@@ -428,3 +428,7 @@ html[lang="zh-Hans"] .invite-meta {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+[hidden] {
+  display: none !important;
+}
