@@ -65,47 +65,48 @@
       greeting: "Hi,",
     },
     ja: {
-      tagline: ["会議を欠席する言い訳を出す。", "効果は保証しない。"],
-      title: "excuse-generator — 会議を欠席する言い訳を出す",
+      tagline: ["会議に出ない言い訳、代わりに考えます。", "通るかどうかは上司次第です。"],
+      title: "excuse-generator — 会議に出ない言い訳、代わりに考えます",
       meeting: "会議",
-      believability: "もっともらしさ",
-      forWhom: "宛先",
-      tonePlausible: "それらしい",
-      toneSuspicious: "怪しい",
-      toneAbsurd: "無茶",
-      audAny: "誰でも",
+      believability: "信ぴょう性",
+      forWhom: "送る相手",
+      tonePlausible: "無難",
+      toneSuspicious: "苦しい",
+      toneAbsurd: "ありえない",
+      audAny: "指定なし",
       audBoss: "上司",
-      audTeam: "チーム",
-      audClient: "顧客",
-      asDecline: "送れる文面にする",
-      generate: "言い訳を出す",
-      again: "もう一つ",
-      hint: "どこにも送られない。言い訳はこのブラウザの中だけ。",
-      onCalendar: "カレンダー上",
-      stampEmpty: "未辞退",
-      stampDeclined: "辞退",
-      empty: "まだ辞退していない。会議は、あなたが来ると信じている。",
+      audTeam: "同僚",
+      audClient: "取引先",
+      asDecline: "そのまま送れる文面にする",
+      generate: "言い訳を考える",
+      again: "別の案",
+      hint: "どこにも送信されません。言い訳はこのブラウザの中だけに残ります。",
+      onCalendar: "予定どおり",
+      stampEmpty: "未回答",
+      stampDeclined: "欠席",
+      empty: "まだ欠席の連絡をしていません。会議はあなたが来ると思っています。",
       copy: "コピー",
-      copied: "コピーした",
-      copyFailed: "失敗",
-      copiedStatus: "クリップボードにコピーした。",
-      copyFailedStatus: "コピーできなかった。文面を選択して写せ。",
-      shareX: "Xで共有",
-      share: "共有",
-      signed: "署名",
+      copied: "コピーしました",
+      copyFailed: "コピー失敗",
+      copiedStatus: "クリップボードにコピーしました。",
+      copyFailedStatus: "コピーできませんでした。文面を選択して手動でコピーしてください。",
+      shareX: "Xでシェア",
+      share: "シェア",
+      signed: "制作",
       langLabel: "言語",
-      forBoss: "上司宛",
-      forTeam: "チーム宛",
-      forClient: "顧客宛",
-      toAny: "関係者",
-      toBoss: "上司",
-      toTeam: "チーム",
-      toClient: "お客様",
-      subject: "辞退：{meeting}",
-      closerAny: "要点があれば、文章で受け取ります。",
-      closerBoss: "結論は文章で共有します。",
-      closerTeam: "先に始めてください。",
-      closerClient: "追ってメールにてご連絡いたします。",
+      forBoss: "上司宛て",
+      forTeam: "同僚宛て",
+      forClient: "取引先宛て",
+      toAny: "関係者各位",
+      toBoss: "〇〇部長",
+      toTeam: "チームの皆さん",
+      toClient: "〇〇株式会社 〇〇様",
+      subject: "{meeting}欠席のご連絡",
+      subjectClient: "本日のお打ち合わせ欠席のお詫び",
+      closerAny: "決まったことがあれば、あとで共有いただけると助かります。",
+      closerBoss: "内容は議事録で確認し、必要な対応は本日中にご報告いたします。",
+      closerTeam: "先に進めておいてください。私の担当分で何かあれば、チャットでメンションをお願いします。",
+      closerClient: "内容は社内で確認のうえ、ご確認いただきたい点があれば本日中にメールにてご連絡いたします。",
       declineLead: "",
       greeting: "",
     },
@@ -288,15 +289,17 @@
       ].join("\n");
     }
     if (lang === "ja") {
-      var lead = label;
-      if (audience === "team") lead += "は抜けます。";
-      else if (audience === "client" || audience === "boss") lead += "は欠席いたします。";
-      else lead += "は欠席します。";
-      var lines = ["宛先: " + to, "件名: " + subject, "時間: " + when, ""];
-      if (audience === "client") lines.push("いつもお世話になっております。");
-      lines.push(lead, "", excuse, "", closer);
-      if (audience === "client") lines.push("よろしくお願いいたします。");
-      return lines.join("\n");
+      var jaSubject = audience === "client" ? t("subjectClient") : subject;
+      var ja = ["宛先：" + to, "件名：" + jaSubject, "所要時間：" + when, ""];
+      if (audience === "boss") ja.push("お疲れ様です。", "", "本日の" + label + "、申し訳ありませんが欠席させてください。");
+      else if (audience === "team") ja.push("お疲れ様です。", "", "今日の" + label + "、すみませんが欠席します。");
+      else if (audience === "client") ja.push("いつもお世話になっております。", "", "大変申し訳ございませんが、本日のお打ち合わせは欠席させていただきたく、ご連絡いたしました。");
+      else ja.push("お疲れ様です。", "", "本日の" + label + "は欠席させていただきます。");
+      ja.push("", excuse, "", closer);
+      if (audience === "client") ja.push("ご迷惑をおかけし大変申し訳ございませんが、何卒よろしくお願いいたします。");
+      else if (audience === "boss") ja.push("よろしくお願いいたします。");
+      else ja.push("よろしくお願いします。");
+      return ja.join("\n");
     }
     var zhSubject = audience === "client" ? t("subjectClient") : subject;
     var zh = ["发给：" + to, "事由：" + zhSubject, "时长：" + when, ""];
