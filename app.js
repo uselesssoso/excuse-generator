@@ -15,6 +15,7 @@
 
   var lang = loadLang();
   var current = null;
+  var lastKey = "";
   var copyTimer = 0;
 
   var UI = {
@@ -202,27 +203,20 @@
 
   function roll() {
     var tone = selectedTone();
-    var families = data.families[tone];
-    var next = null;
+    var list = data.lines[tone][lang];
+    var nextIndex = 0;
+    var key = "";
     var guard = 0;
     do {
-      next = {
-        family: Math.floor(rand() * families.length),
-        situation: Math.floor(rand() * families[0].situations.en.length),
-        bridge: Math.floor(rand() * families[0].bridges.en.length),
-        punch: Math.floor(rand() * families[0].punchlines.any.en.length),
-        shape: Math.floor(rand() * data.shapes),
-      };
+      nextIndex = Math.floor(rand() * list.length);
+      key = tone + "|" + lang + "|" + nextIndex;
       guard += 1;
-    } while (current && sameRoll(next, current) && guard < 8);
-    current = next;
+    } while (key === lastKey && list.length > 1 && guard < 12);
+    lastKey = key;
+    current = { index: nextIndex };
     render();
     var reduced = prefersReducedMotion();
     invite.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
-  }
-
-  function sameRoll(a, b) {
-    return a.family === b.family && a.situation === b.situation && a.bridge === b.bridge && a.punch === b.punch && a.shape === b.shape;
   }
 
   function render() {
@@ -247,7 +241,8 @@
       return;
     }
 
-    var built = buildExcuse(tone, audience, meeting);
+    var built = buildExcuse(tone, meeting);
+    lastKey = tone + "|" + lang + "|" + current.index;
     invite.dataset.state = "ready";
     invite.dataset.tone = tone;
     text("stamp", t("stampDeclined"));
@@ -263,13 +258,11 @@
     shareX.textContent = t("shareX");
   }
 
-  function buildExcuse(tone, audience, meeting) {
-    var family = data.families[tone][current.family];
-    var situation = fill(family.situations[lang][current.situation], meeting.label[lang]);
-    var bridge = fill(family.bridges[lang][current.bridge], meeting.label[lang]);
-    var punch = fill(family.punchlines[audience][lang][current.punch], meeting.label[lang]);
-    var parts = current.shape === 0 ? [situation, punch] : current.shape === 1 ? [situation, bridge, punch] : [bridge, situation, punch];
-    return { text: joinSentences(parts), parts: parts };
+  function buildExcuse(tone, meeting) {
+    var list = data.lines[tone][lang];
+    var index = current.index;
+    if (index >= list.length) index = 0;
+    return { text: fill(list[index], meeting.label[lang]) };
   }
 
   function declineMessage(excuse, meeting, audience) {
@@ -326,7 +319,7 @@
   }
 
   function shareExcuse() {
-    var built = buildExcuse(selectedTone(), selectedAudience(), selectedMeeting());
+    var built = buildExcuse(selectedTone(), selectedMeeting());
     var textValue = asDecline.checked ? declineMessage(built.text, selectedMeeting(), selectedAudience()) : built.text;
     navigator.share({ title: "excuse-generator", text: textValue }).catch(function (error) {
       if (error && error.name === "AbortError") return;
@@ -341,12 +334,6 @@
   function xText(excuse) {
     var budget = X_MAX - X_URL_LENGTH - 1;
     if (weightedLength(excuse) <= budget) return excuse;
-    var sentences = splitSentences(excuse);
-    if (sentences.length > 2) {
-      var shorter = joinSentences([sentences[0], sentences[sentences.length - 1]]);
-      if (weightedLength(shorter) <= budget) return shorter;
-      excuse = shorter;
-    }
     var ellipsis = "…";
     var room = budget - weightedLength(ellipsis);
     var trimmed = "";
@@ -364,11 +351,6 @@
     trimmed = trimmed.replace(/[ \t]+\S*$/, "").replace(/[。.\s]+$/g, "").trim();
     if (!trimmed) trimmed = excuse.slice(0, 1);
     return trimmed + ellipsis;
-  }
-
-  function splitSentences(value) {
-    if (lang === "en") return value.split(". ").map(function (part) { return part.replace(/\.$/, ""); }).filter(Boolean);
-    return value.split("。").filter(Boolean);
   }
 
   function charWeight(code) {
@@ -480,15 +462,6 @@
     return String(template).split("{meeting}").join(label);
   }
 
-  function joinSentences(parts) {
-    var cleaned = parts.filter(Boolean).map(function (part) {
-      return String(part).replace(/[。.\s]+$/g, "").trim();
-    }).filter(Boolean);
-    if (!cleaned.length) return "";
-    if (lang === "en") return cleaned.join(". ") + ".";
-    return cleaned.join("。") + "。";
-  }
-
   function text(id, value) {
     document.getElementById(id).textContent = value;
   }
@@ -594,28 +567,24 @@
   }
 
   function validateData() {
-    var tones = data.tones;
-    var base = data.families.plausible;
-    tones.forEach(function (tone) {
-      var families = data.families[tone];
-      if (families.length !== base.length) throw new Error("family count " + tone);
-      families.forEach(function (family, index) {
-        ["en", "ja", "zh"].forEach(function (code) {
-          if (family.situations[code].length !== base[index].situations.en.length) {
-            throw new Error("situations " + tone + " " + family.id + " " + code);
+    data.tones.forEach(function (tone) {
+      ["en", "ja", "zh"].forEach(function (code) {
+        var list = data.lines[tone] && data.lines[tone][code];
+        if (!list || list.length < 60) throw new Error("short bank " + tone + " " + code);
+        list.forEach(function (line, index) {
+          if (!line || !String(line).trim()) throw new Error("empty " + tone + " " + code + " " + index);
+          if (String(line).indexOf("{") !== -1 && String(line).indexOf("{meeting}") === -1) {
+            throw new Error("bad slot " + tone + " " + code + " " + index);
           }
-          if (family.bridges[code].length !== base[index].bridges.en.length) {
-            throw new Error("bridges " + tone + " " + family.id + " " + code);
-          }
-          data.audiences.forEach(function (audience) {
-            var list = family.punchlines[audience][code];
-            if (!list || list.length !== base[index].punchlines.any.en.length) {
-              throw new Error("punchlines " + tone + " " + family.id + " " + audience + " " + code);
-            }
-          });
+          if (sentenceCount(line, code) > 2) throw new Error("long " + tone + " " + code + " " + index);
         });
       });
     });
+  }
+
+  function sentenceCount(line, code) {
+    var parts = String(line).split(code === "en" ? /[.?!]+/ : /[。？！]+/);
+    return parts.filter(function (part) { return part.trim().length > 0; }).length;
   }
 
   applyStatic();

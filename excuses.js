@@ -1,1747 +1,6 @@
-/* Combinatorial excuses. Same slot across languages is the same premise, written for that language. */
+/* Complete excuses. One or two sentences. {meeting} is the only slot. */
 var EXCUSES = (function (root) {
   "use strict";
-
-  function lines(rows) {
-    return {
-      en: rows.map(function (row) { return row[0]; }),
-      ja: rows.map(function (row) { return row[1]; }),
-      zh: rows.map(function (row) { return row[2]; }),
-    };
-  }
-
-  function family(id, situations, bridges, punchlines) {
-    return {
-      id: id,
-      situations: lines(situations),
-      bridges: lines(bridges),
-      punchlines: {
-        any: lines(punchlines.any),
-        boss: lines(punchlines.boss),
-        team: lines(punchlines.team),
-        client: lines(punchlines.client),
-      },
-    };
-  }
-
-  var calendar = {
-    plausible: family(
-      "calendar",
-      [
-        [
-          "A hold I put on my own calendar is sitting on this hour, and it will not move",
-          "自分で押さえた予定が、この時間に居座っています",
-          "我自己锁上的那段忙，正好压着这一小时，挪不走",
-        ],
-        [
-          "The block before the {meeting} changed its name instead of ending",
-          "{meeting}の前の予定は、終わらずに件名だけ変わりました",
-          "{meeting}前面那场没有散，只是换了个标题",
-        ],
-        [
-          "Two invites want this hour, and I already answered the earlier one",
-          "招待が二つこの時間を取り合い、先のほうには返事済みです",
-          "两份邀请都要这个小时，我已经回了先到的那份",
-        ],
-        [
-          "This slot already has an earlier claim, and I am keeping the claim",
-          "この枠には先約があり、先約のほうを守ります",
-          "这个点已经有一个更早的约定，我留在那个约定里",
-        ],
-      ],
-      [
-        [
-          "On paper the overlap is short. In practice it is the whole hour",
-          "紙の上の重なりは短いです。実際は一時間ぶんです",
-          "纸面上只重叠了一小会儿，实际是整整一小时",
-        ],
-        [
-          "I looked at the calendar again. It did not revise itself",
-          "カレンダーをもう一度見ました。訂正はありませんでした",
-          "我又看了一眼日历。它没有改口",
-        ],
-        [
-          "Moving one meeting would only annoy the other",
-          "片方を動かすと、もう片方が気を悪くします",
-          "挪开这场，另一场就会不高兴",
-        ],
-      ],
-      {
-        any: [
-          [
-            "I will read the notes as if the chair had been occupied",
-            "議事は、座っていたものとして読みます",
-            "纪要我会当成自己在场来读",
-          ],
-          [
-            "Please treat this as a no, with the calendar as the attachment",
-            "カレンダーを添えた辞退として扱ってください",
-            "就把这当成一封附件是日历的辞谢",
-          ],
-          [
-            "I can follow the decision. I cannot attend both hours",
-            "決定にはつけます。二つの時間には出られません",
-            "决定我跟得上。两个小时我没法同时到场",
-          ],
-        ],
-        boss: [
-          [
-            "The earlier hold has tenure. I am not going to argue with it",
-            "先約のほうに在籍年数があります。論争はしません",
-            "先占住的那场有年资。我不跟它争",
-          ],
-          [
-            "You will have my part without the overlap talking over it",
-            "重なっているほうに遮られず、私の分は届きます",
-            "我的部分会送到，不会被重叠的那场抢话",
-          ],
-          [
-            "Please decide on schedule. My voice is rented to the other block",
-            "予定どおり決めてください。声はもう一方に貸し出しています",
-            "请按点做决定。我的声音租给另一场了",
-          ],
-        ],
-        team: [
-          [
-            "I'll add my line where it cannot spend the first five minutes",
-            "最初の五分を使わない場所に、自分の一行を足します",
-            "我会把那一行写在花不掉前五分钟的地方",
-          ],
-          [
-            "Go ahead. My absence is the conflict, not a review of the agenda",
-            "進めてください。欠席は予定の衝突で、議題への評価ではありません",
-            "你们开。我缺席是因为撞期，不是在给议程打分",
-          ],
-          [
-            "I'll pick up the thread once I am only in one meeting",
-            "会議が一つになったら、スレッドを拾います",
-            "等我只剩一场会，我就去接那条消息",
-          ],
-        ],
-        client: [
-          [
-            "The other hold was here first, and it does not know your name",
-            "先約はこちらの名前を知りません。先にいたのは向こうです",
-            "先占住的那场并不知道您是谁，而且它先到",
-          ],
-          [
-            "Please keep the hour. I will not split it into two bad ones",
-            "この時間はお受け取りください。悪い一時間を二つにはしません",
-            "这个小时请您留着。我不会把它拆成两个糟糕的小时",
-          ],
-          [
-            "I would rather return the slot than attend it halfway",
-            "中途半端に出るより、枠はお返しします",
-            "与其出席一半，不如把时段还给您",
-          ],
-        ],
-      }
-    ),
-    suspicious: family(
-      "calendar",
-      [
-        [
-          "My calendar double-booked me with myself",
-          "カレンダーが、私を私と二重予約しました",
-          "日历把我和我自己订在了同一个时间",
-        ],
-        [
-          "I am already in a meeting about whether the {meeting} should happen",
-          "{meeting}をやるかどうかの会議に、すでに入っています",
-          "我已经在开一场会，议题是这场{meeting}要不要开",
-        ],
-        [
-          "The invite has two times, and I stayed loyal to the one I saw first",
-          "招待の時刻が二つあり、先に見たほうに残っています",
-          "邀请上有两个时间，我留在先看见的那个",
-        ],
-        [
-          "A copy of this hour is already in progress, and I am in that copy",
-          "この時間の複製がすでに進行していて、私はそちらにいます",
-          "这个小时有一份副本正在进行，我在那一份里",
-        ],
-      ],
-      [
-        [
-          "Both versions of me have a hard stop",
-          "どちらの私にも、次の予定が詰まっています",
-          "两个我都有紧接着的下一场",
-        ],
-        [
-          "I would explain, but the explanation is double-booked too",
-          "説明したいのですが、説明の枠も二重です",
-          "我想解释，可解释的时间也被订重了",
-        ],
-        [
-          "The calendar decided this without scheduling a meeting, which I respect",
-          "カレンダーは会議を開かずにこれを決めました。そこは尊敬します",
-          "日历没开会就做了决定。这一点我尊重",
-        ],
-      ],
-      {
-        any: [
-          [
-            "I'm in the other one",
-            "もう一方にいます",
-            "我在另一场里",
-          ],
-          [
-            "Please proceed with the version of me that is not speaking",
-            "今しゃべっていないほうの私で、進めてください",
-            "请和现在没在说话的那个我继续",
-          ],
-          [
-            "Send the outcome. An outcome is the only thing I can attend twice",
-            "結果を送ってください。二度出席できるのは、結果だけです",
-            "把结果发我。我唯一能出席两次的，是结果",
-          ],
-        ],
-        boss: [
-          [
-            "I will report what the other meeting decides, if it decides",
-            "もう一方が決めたら報告します。決めたらの話です",
-            "另一场如果真有结论，我会汇报。前提是它有",
-          ],
-          [
-            "You will get comments in a form that does not talk over you",
-            "コメントは、誰の話も遮らない形で出します",
-            "意见我会写成不打断任何人的形式",
-          ],
-          [
-            "I can attend the summary. The summary is single-booked",
-            "要約なら出られます。要約は一重です",
-            "总结我能参加。总结没有被订重",
-          ],
-        ],
-        team: [
-          [
-            "If I join, that is the other one, and it is not brief",
-            "入ってきたら、それはもう一人のほうで、短くありません",
-            "若我出现，那是另一个我，而且不会短",
-          ],
-          [
-            "I'll annotate the notes with the opinion I would have had",
-            "議事に、出すはずだった意見を書き足します",
-            "我会在纪要上补上我本来会有的意见",
-          ],
-          [
-            "Go ahead. The laptop is already closed, which is a kind of RSVP",
-            "進めてください。ノートはすでに閉じています。あれも出欠です",
-            "你们开吧。电脑已经合上了，那也算一种回复",
-          ],
-        ],
-        client: [
-          [
-            "Joining would add a second login to a meeting that already has me",
-            "出ると、すでに私がいる会議にログインがもう一つ増えます",
-            "我要是进场，一场已经有我的会会再多一个登录",
-          ],
-          [
-            "The copy of me that answers mail is free later. This one is not",
-            "メールを返すほうの私は、あとで空きます。今の私は空きません",
-            "回邮件的那个我稍后有空。现在这个没有",
-          ],
-          [
-            "You should have someone who is only in your meeting",
-            "そちらの会議にだけいる人間が、必要だと思います",
-            "您需要的是一个只在您这场会里的人",
-          ],
-        ],
-      }
-    ),
-    absurd: family(
-      "calendar",
-      [
-        [
-          "My calendar double-booked me with myself, and the other me already accepted",
-          "カレンダーが私を私と二重予約し、もう一人がすでに承諾しました",
-          "日历把我和我自己订重了，另一个我已经点了接受",
-        ],
-        [
-          "The {meeting} accepted itself. I was not consulted",
-          "{meeting}が自分で出席を承諾しました。私には相談がありません",
-          "这场{meeting}自己接受了自己。没有人问过我",
-        ],
-        [
-          "A previous version of me is on the invite, and their notes are already excellent",
-          "前の版の私が招待に入っていて、その議事はすでに優秀です",
-          "邀请里坐着上一版的我，纪要已经写得很好",
-        ],
-        [
-          "This hour belongs to a recurring event called \"Do Not\", which has never missed",
-          "この時間は「入るな」という定例が持っていて、欠かしたことがありません",
-          "这个小时属于一个叫「别来」的例会，它从未缺席",
-        ],
-      ],
-      [
-        [
-          "I tried to decline, and the decline is waiting on the decline",
-          "辞退しようとしたら、辞退が辞退の承認待ちになりました",
-          "我试着拒绝，拒绝本身还在等拒绝的批准",
-        ],
-        [
-          "A third copy of me would need a chair we do not have",
-          "三人目の私には、ない椅子が必要です",
-          "第三个我需要一把我们没有的椅子",
-        ],
-        [
-          "I am reachable by carrier pigeon, and the pigeon is in another meeting",
-          "連絡手段は伝書鳩です。鳩は別件で会議中です",
-          "可以联系我，途径是信鸽。鸽子在开别的会",
-        ],
-      ],
-      {
-        any: [
-          [
-            "I'm in the other one",
-            "もう一方にいます",
-            "我在另一场里",
-          ],
-          [
-            "Please remove the version of me that can still feel time",
-            "まだ時間を感じるほうの私を、外してください",
-            "请把那个还能感觉到时间的我去掉",
-          ],
-          [
-            "My placeholder will attend. It has opinions and no microphone",
-            "私の代わりの空白が出席します。意見はあり、マイクはありません",
-            "我的占位会出席。它有意见，没有麦克风",
-          ],
-        ],
-        boss: [
-          [
-            "I will file a report from the copy that went. It is more prepared",
-            "出席したほうの私から報告します。あちらのほうが準備しています",
-            "我会交一份出席了的那个我的报告。那个我准备得更充分",
-          ],
-          [
-            "Consider me present in the attachments",
-            "添付の中には、私がいます",
-            "请把我算作在附件里出席",
-          ],
-          [
-            "I approve in advance. It is the only tense I have left",
-            "事前に承認します。残っている時制はそれだけです",
-            "我提前批准。这是我剩下的唯一时态",
-          ],
-        ],
-        team: [
-          [
-            "If I appear, it is the other one, and it does not get a vote",
-            "現れたら別の私です。投票権はありません",
-            "若我出现，那是另一个我，没有投票权",
-          ],
-          [
-            "Count the silence as a yes from the next desk over in time",
-            "この沈黙は、時間の隣席からの賛成として数えてください",
-            "把这段沉默算成时间上邻座的一个赞成",
-          ],
-          [
-            "I will haunt the document, not the call",
-            "取りつくのは会議ではなく、文書のほうです",
-            "我闹的是文档，不是这通电话",
-          ],
-        ],
-        client: [
-          [
-            "A more presentable copy of me will write later. This one is fully booked",
-            "もう少し整ったほうの私が、あとで書きます。こちらは満席です",
-            "比较能见人的那个我稍后会写。这一个已经满员",
-          ],
-          [
-            "Please read this as a decline sent from the present tense",
-            "現在形から送られた辞退として、読んでください",
-            "请把这封读成现在时发出的辞谢",
-          ],
-          [
-            "You will get the work. The work is not double-booked",
-            "成果はお渡しします。成果は二重予約されていません",
-            "东西会交给您。东西没有被订重",
-          ],
-        ],
-      }
-    ),
-  };
-
-  var overlap = {
-    plausible: family(
-      "overlap",
-      [
-        [
-          "The call before the {meeting} is still going, in the way calls do",
-          "{meeting}の前の通話が、通話らしく、まだ終わっていません",
-          "{meeting}之前那通还没完，而且完得不太像会完",
-        ],
-        [
-          "I am still in the previous conversation. It has not been told that it ended",
-          "前の会話にまだいます。終わったと、その会話は聞いていません",
-          "我还在上一场对话里。那场对话没收到结束的通知",
-        ],
-        [
-          "A thread marked urgent opened a few minutes ago and believes itself",
-          "数分前に「急ぎ」のスレッドが開き、自分を信じています",
-          "几分钟前开了一条标着紧急的消息，而且它相信自己",
-        ],
-        [
-          "Something I said I would finish before this slot is still on the screen",
-          "この枠の前に終えると言ったものが、まだ画面に残っています",
-          "我说好在这个时段之前做完的东西，还在屏幕上",
-        ],
-      ],
-      [
-        [
-          "Leaving now would make two conversations worse",
-          "今抜けると、会話が二つとも悪くなります",
-          "现在走，两场都会更糟",
-        ],
-        [
-          "I offered it five more minutes. It accepted",
-          "あと五分だけ差し出しました。受け取られました",
-          "我又给了五分钟。对方收下了",
-        ],
-        [
-          "I will be free when it ends, which is not a time on a clock",
-          "終われば空きます。時計の時刻ではありません",
-          "等它结束我就有空。这不是钟面上的一个点",
-        ],
-      ],
-      {
-        any: [
-          [
-            "I will collect the version that has an ending",
-            "終わりのある版を、あとで受け取ります",
-            "我之后来收那个有结尾的版本",
-          ],
-          [
-            "Arrival from here would be a rumor with a login",
-            "ここから入ると、ログイン付きの噂になります",
-            "我现在进去，只会是一个带登录状态的传闻",
-          ],
-          [
-            "My part can wait in writing, where it cannot run long",
-            "私の分は文章で待てます。文章は延長しません",
-            "我的部分可以等在文字里。文字不会超时",
-          ],
-        ],
-        boss: [
-          [
-            "You will get the point once I am in only one conversation",
-            "会話が一つになったら、要点をお渡しします",
-            "等我只剩一场对话，就把要点给你",
-          ],
-          [
-            "The update will not bring the previous meeting with it",
-            "更新には、前の会議を添付しません",
-            "更新不会把上一场会一起带来",
-          ],
-          [
-            "Please go ahead. I will not make this overlap your problem twice",
-            "進めてください。この重なりを、二度ご負担にはしません",
-            "请先开。这次重叠我不会让您承担两次",
-          ],
-        ],
-        team: [
-          [
-            "I'll wave from the other call if the mute holds",
-            "ミュートが保てば、向こうの通話から手を振ります",
-            "如果静音还在，我就从另一通里挥一下手",
-          ],
-          [
-            "My update is three lines, and the thread has room",
-            "更新は三行です。スレッドには余白があります",
-            "我的更新就三行，消息里还放得下",
-          ],
-          [
-            "I'll add what I would have said once it no longer has to be live",
-            "その場で言う必要がなくなってから、言うはずだったことを足します",
-            "等这件事不必当场说了，我再补上本来要说的",
-          ],
-        ],
-        client: [
-          [
-            "I will write when the other call admits that it is over",
-            "もう一方の通話が終了を認めたら、書きます",
-            "另一通承认自己结束之后，我就写",
-          ],
-          [
-            "Please keep the slot. I will come back with the point, not the delay",
-            "枠はそのままで大丈夫です。遅延ではなく要点を持って戻ります",
-            "时段您先留着。我带回的会是要点，不是这段延误",
-          ],
-          [
-            "A clear note is better than a caller who is half somewhere else",
-            "どこか別の場所に半分いる出席より、明確なメモのほうがよいはずです",
-            "人在别处、心也在别处的出席，不如一封清楚的说明",
-          ],
-        ],
-      }
-    ),
-    suspicious: family(
-      "overlap",
-      [
-        [
-          "The previous meeting ended on the calendar and nowhere else",
-          "前の会議は、カレンダーの上でだけ終了しました",
-          "上一场会只在日历上结束了",
-        ],
-        [
-          "I am in a meeting that was supposed to decide if we need the {meeting}",
-          "{meeting}が必要かの会議に入ったままです",
-          "我还在那场用来决定要不要开{meeting}的会里",
-        ],
-        [
-          "A five-minute overlap has been five minutes for a while now",
-          "五分の重なりが、しばらく五分のままです",
-          "那个五分钟的重叠，已经五分钟了有一会儿",
-        ],
-        [
-          "I stepped into a hallway question, and it formed a quorum",
-          "廊下で一つ質問を受けたら、定足数になりました",
-          "走廊里有人问了我一句，然后凑够了开会的人数",
-        ],
-      ],
-      [
-        [
-          "Both rooms believe I am in the other one",
-          "どちらの部屋も、私は向こうにいると信じています",
-          "两边的房间都相信我在另一边",
-        ],
-        [
-          "I have been about to join since the invite was still on time",
-          "招待がまだ時間どおりだった頃から、入るところです",
-          "从邀请还算准时的时候起，我就一直是即将加入",
-        ],
-        [
-          "Leaving would require an ending, and endings are in another meeting",
-          "抜けるには終了が必要で、終了は別の会議の議題です",
-          "要离开得先有个结尾，而结尾在另一场会的议程上",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Please start. I am already late to the meeting I am in",
-            "始めてください。今いる会議にも、すでに遅れています",
-            "你们先开。我连现在这场会也已经迟到了",
-          ],
-          [
-            "I will arrive as the notes, which have better attendance",
-            "議事として到着します。議事のほうが出席率は高いです",
-            "我会以纪要的形式到达。纪要的出勤率更高",
-          ],
-          [
-            "Count me present in the overlap and absent in the useful part",
-            "重なっている部分には在席、役に立つ部分には不在、でお願いします",
-            "重叠的那一段算我在，有用的那一段算我缺席",
-          ],
-        ],
-        boss: [
-          [
-            "You will hear from me when I can hear only you",
-            "あなただけが聞こえる状態になったら、連絡します",
-            "等我只能听见您的时候，我会联系",
-          ],
-          [
-            "I will not import the previous meeting into your agenda",
-            "前の会議を、そちらの議題には輸入しません",
-            "我不会把上一场会进口到您的议程里",
-          ],
-          [
-            "Please take the decision. I am still in the preamble elsewhere",
-            "決定はお進めください。私は別の場所で、まだ前置きにいます",
-            "决定请您先做。我在别处，还停在开场白",
-          ],
-        ],
-        team: [
-          [
-            "I'll drop the three lines in the thread when the other call blinks",
-            "向こうの通話が瞬きしたら、三行をスレッドに置きます",
-            "另一通如果眨眼，我就把三行丢进消息里",
-          ],
-          [
-            "Go ahead. I am the person the other meeting also cannot find",
-            "進めてください。もう一方の会議も、私を見つけられていません",
-            "你们开。另一场会同样找不到我",
-          ],
-          [
-            "Save me a sentence. I will disagree with it in writing if needed",
-            "一文だけ残してください。必要なら文章で反対します",
-            "给我留一句话。有需要的话我书面反对",
-          ],
-        ],
-        client: [
-          [
-            "I am midway through a call that has forgotten its own title",
-            "件名を忘れた通話の途中にいます",
-            "我在一通已经忘了自己标题的电话中间",
-          ],
-          [
-            "You should not have to share the hour with that call",
-            "あの通話と一時間を分け合う必要は、ありません",
-            "您不必和那通电话分享这一个小时",
-          ],
-          [
-            "I will send the answer without bringing the other room",
-            "もう一つの部屋は連れてこず、答えだけ送ります",
-            "答案我会送来，另一间房间不一起带来",
-          ],
-        ],
-      }
-    ),
-    absurd: family(
-      "overlap",
-      [
-        [
-          "The meeting before this one is still introducing the meeting before that",
-          "前の会議が、その前の会議の自己紹介をまだしています",
-          "上一场会还在介绍它的上一场会",
-        ],
-        [
-          "I am in a sync about the {meeting}, which is itself a sync about a sync",
-          "{meeting}のためのシンクにいます。そのシンクも、シンクのシンクです",
-          "我在一场为了{meeting}而开的同步里，那场同步本身也是同步的同步",
-        ],
-        [
-          "A quick question from this morning has appointed a chair and a note-taker",
-          "今朝のちょっとした質問が、議長と書記を任命しました",
-          "今天早上的一个小问题，已经任命了主持人和记录人",
-        ],
-        [
-          "I would leave the previous meeting, but it has not acknowledged my presence, so I cannot exit",
-          "前の会議を出たいのですが、在席を認められていないので退出できません",
-          "我想离开上一场，可它还没承认我在场，所以我无法退场",
-        ],
-      ],
-      [
-        [
-          "Time is attending. I am the optional one",
-          "時間のほうが出席しています。任意なのは私です",
-          "时间在出席。可选的是我",
-        ],
-        [
-          "The overlap has an overlap. I am in the inner one",
-          "重なりに重なりがあり、私は内側にいます",
-          "重叠上面还有一层重叠。我在里面那层",
-        ],
-        [
-          "I sent my regrets to the previous meeting. It replied with an agenda",
-          "前の会議に欠席を出したら、議題が返ってきました",
-          "我向上一场发了歉意，它回了我一份议程",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Please start. I am nested too deeply to reach the door",
-            "始めてください。ドアまで、入れ子が深すぎます",
-            "你们先开。我嵌套得太深，够不着门",
-          ],
-          [
-            "I will attend the recap of the recap, which is my natural habitat",
-            "振り返りの振り返りには出ます。そこが生息地です",
-            "回顾的回顾我会参加。那是我的栖息地",
-          ],
-          [
-            "Forward the ending. I collect those",
-            "終わりを転送してください。収集しています",
-            "请把结尾转发我。我在收集这个",
-          ],
-        ],
-        boss: [
-          [
-            "You may assume I said something reasonable in the meeting I cannot leave",
-            "出られない会議では、妥当なことを言ったと見なしてください",
-            "请默认我在那场出不来的会里说了句得体的话",
-          ],
-          [
-            "I will surface when the stack of meetings unwinds",
-            "会議のスタックが解けたら、浮上します",
-            "等这叠会一层层退完，我就浮上来",
-          ],
-          [
-            "Please take this as a status: blocked, by a meeting",
-            "状況は「ブロック、原因は会議」として受け取ってください",
-            "请把状态看成：被阻塞，阻塞源是一场会",
-          ],
-        ],
-        team: [
-          [
-            "I'll post from inside the other meeting, like a dispatch",
-            "もう一方の会議の内側から、通信のように書きます",
-            "我会从另一场会内部发消息，像一则外勤通报",
-          ],
-          [
-            "Go ahead. If you hear me, that is echo from the previous agenda",
-            "進めてください。声がしたら、前の議題の残響です",
-            "你们开。如果听见我，那是上一份议程的回声",
-          ],
-          [
-            "Leave the notes where the nested version of me can find them",
-            "入れ子になった私が見つけられる場所に、議事を置いてください",
-            "把纪要放在嵌套版的我找得到的地方",
-          ],
-        ],
-        client: [
-          [
-            "I am several meetings deep, and yours deserves the one at the surface",
-            "会議が何層か重なっていて、そちらには表層の私が要るはずです",
-            "我会叠了好几层。您这场应该得到浮在表面的那个我",
-          ],
-          [
-            "A written answer will not be trapped in the preamble",
-            "文章の答えは、前置きの中に閉じ込められません",
-            "书面的答复不会被困在开场白里",
-          ],
-          [
-            "Please keep your agenda free of the meeting I am stuck inside",
-            "私が挟まっている会議を、そちらの議題には入れないでください",
-            "请别把我卡住的那场会写进您的议程",
-          ],
-        ],
-      }
-    ),
-  };
-
-  var logistics = {
-    plausible: family(
-      "logistics",
-      [
-        [
-          "I am in the other building, and the link between them is theoretical",
-          "別の建物にいます。二つのあいだは、理論上つながっています",
-          "我在另一栋楼。两栋之间的连接目前还是理论",
-        ],
-        [
-          "My badge opens every door except the one the {meeting} is behind",
-          "バッジが開かないのは、{meeting}の向こうの扉だけです",
-          "门禁卡哪扇都打得开，除了这场{meeting}后面那一扇",
-        ],
-        [
-          "The trip in is using the time the {meeting} thought it owned",
-          "向かう道が、{meeting}が自分のものだと思っていた時間を使っています",
-          "去的路上，正在用掉这场{meeting}以为属于自己的时间",
-        ],
-        [
-          "I stepped away for a minute, and the minute has become a corridor",
-          "一分だけ席を外したら、その一分が廊下になりました",
-          "我离开工位一分钟，那一分钟长成了一条走廊",
-        ],
-      ],
-      [
-        [
-          "I am closer to a hallway than to a chair",
-          "椅子より廊下に近い場所にいます",
-          "我离走廊比离椅子近",
-        ],
-        [
-          "The building and I are in a polite disagreement",
-          "建物と私は、礼儀正しく意見が分かれています",
-          "大楼和我正在礼貌地意见不合",
-        ],
-        [
-          "I will not arrive in a way that helps the hour",
-          "この一時間の役に立つ入り方は、できそうにありません",
-          "我到达的方式，大概帮不上这一个小时",
-        ],
-      ],
-      {
-        any: [
-          [
-            "I am on the premises in a legal sense only",
-            "敷地内なのは、手続き上の話です",
-            "我算人在园区，只是门禁系统这么认为",
-          ],
-          [
-            "I will catch up when I am in the same building as the meeting",
-            "会議と同じ建物に入ったら、追いつきます",
-            "等我和这场会在同一栋楼，我再补上",
-          ],
-          [
-            "Count me out of the room and in on the notes",
-            "部屋の外、議事の内、で数えてください",
-            "房间里不要算我，纪要里可以算",
-          ],
-        ],
-        boss: [
-          [
-            "I will write from the place I actually am",
-            "実際にいる場所から書きます",
-            "我会从我真正所在的地方写",
-          ],
-          [
-            "You should not have to wait on a person who is negotiating with a door",
-            "ドアと交渉している人間を、待たせるべきではありません",
-            "您不必等一个还在跟门谈判的人",
-          ],
-          [
-            "Please go ahead. My coordinates are not a contribution",
-            "進めてください。私の座標は貢献になりません",
-            "请先开。我的坐标成不了贡献",
-          ],
-        ],
-        team: [
-          [
-            "If I arrive, it will be during the last sentence",
-            "着くなら、最後の文の途中です",
-            "我若赶到，大概在最后一句话的中间",
-          ],
-          [
-            "I'll take the hallway version. It is the short one",
-            "廊下版を受け取ります。短いほうです",
-            "我收走廊版。那一版比较短",
-          ],
-          [
-            "I'll read the notes from a chair that is not in that room",
-            "その部屋にない椅子から、議事を読みます",
-            "我会坐在不在那个房间里的椅子上读纪要",
-          ],
-        ],
-        client: [
-          [
-            "I would rather write than arrive in the form of a delay",
-            "遅れという形で到着するより、書きます",
-            "与其以延误的形式到达，不如写下来",
-          ],
-          [
-            "Please keep your hour. Mine is in transit",
-            "そちらの一時間はそのままで。私の分は移動中です",
-            "您的这一小时请照常用。我这份正在路上",
-          ],
-          [
-            "You will have the substance today, without the corridor",
-            "廊下なしで、中身は今日お渡しします",
-            "今天您会拿到正事，不附带那条走廊",
-          ],
-        ],
-      }
-    ),
-    suspicious: family(
-      "logistics",
-      [
-        [
-          "The room number changed while I was walking to the previous one",
-          "前の部屋へ歩いているあいだに、部屋番号が変わりました",
-          "我走向原来那间的时候，房间号变了",
-        ],
-        [
-          "I am badged into the building and not into the {meeting}",
-          "建物には入れています。{meeting}には入れていません",
-          "我刷进了大楼，没有刷进这场{meeting}",
-        ],
-        [
-          "Transit offered me a delay and called it a seat",
-          "移動手段が、座席の代わりに遅延をくれました",
-          "交通工具给了我一段延误，并称之为座位",
-        ],
-        [
-          "I can see the meeting room. The meeting room cannot see a reason to open",
-          "会議室は見えています。会議室のほうは、開く理由を見ていません",
-          "我看得见会议室。会议室看不见开门的理由",
-        ],
-      ],
-      [
-        [
-          "I have walked the same hallway twice, which is a kind of attendance",
-          "同じ廊下を二度歩きました。あれも出席の一種です",
-          "同一条走廊我走了两遍。这也算一种出席",
-        ],
-        [
-          "The map and the building have different opinions",
-          "地図と建物で、意見が違います",
-          "地图和大楼意见不一致",
-        ],
-        [
-          "I am early for a room that does not exist yet",
-          "まだない部屋に、早く着いてしまいました",
-          "我提前到了一间还不存在的房间",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Please start. I am a visitor in my own office",
-            "始めてください。自席の来客になっています",
-            "你们先开。我目前是自己办公室的访客",
-          ],
-          [
-            "I will join from the correct floor when the building picks one",
-            "建物が階を一つに決めたら、正しいほうから入ります",
-            "等大楼选定一个楼层，我就从正确的那层加入",
-          ],
-          [
-            "Treat my location as approximate, and my absence as exact",
-            "所在は概算、欠席は正確、で扱ってください",
-            "我的位置请按大约处理，缺席请按精确处理",
-          ],
-        ],
-        boss: [
-          [
-            "I will confirm once I am in a room the invite agrees with",
-            "招待と合意できる部屋に入ったら、連絡します",
-            "等我进了一间和邀请意见一致的房间，我就说一声",
-          ],
-          [
-            "You should have the meeting. I am still in the floor plan",
-            "会議はお進めください。私はまだ平面図の中です",
-            "会请您先开。我还在平面图里",
-          ],
-          [
-            "I will send the update from a corridor with a name",
-            "名前のある廊下から、更新を送ります",
-            "我会从一条有名字的走廊把更新发出去",
-          ],
-        ],
-        team: [
-          [
-            "If you see me, that is someone who found the room. Wish them well",
-            "私を見たら、部屋を見つけた人です。健闘を祈ってください",
-            "你们要是看见我，那是找到了房间的人。祝他顺利",
-          ],
-          [
-            "I'll take the notes. I already have the steps",
-            "議事は受け取ります。歩数のほうは足りています",
-            "纪要我收。步数我已经够了",
-          ],
-          [
-            "Go ahead. I am attending the hallway's standing room",
-            "進めてください。廊下の立ち見席にいます",
-            "你们开吧。我在走廊的站票区",
-          ],
-        ],
-        client: [
-          [
-            "I am close enough to wave and not close enough to be useful",
-            "手を振るには近く、役に立つには遠いです",
-            "近到可以招手，远到帮不上忙",
-          ],
-          [
-            "Please begin. I will not make my route part of your agenda",
-            "始めてください。経路を、そちらの議題にはしません",
-            "请开始。我不会把我的路线写进您的议程",
-          ],
-          [
-            "You will have a note from me, not a travelogue",
-            "届くのはメモで、旅行記ではありません",
-            "您会收到一张说明，不是一篇游记",
-          ],
-        ],
-      }
-    ),
-    absurd: family(
-      "logistics",
-      [
-        [
-          "The {meeting} is in a room that only exists on the invite",
-          "{meeting}の部屋は、招待状の中にだけあります",
-          "这场{meeting}的房间只存在于邀请里",
-        ],
-        [
-          "I took the stairs between buildings and came out on yesterday",
-          "建物のあいだの階段を上がったら、昨日に出ました",
-          "我走了两栋楼之间的楼梯，出来的时候是昨天",
-        ],
-        [
-          "My chair is attending. I was not on the shipping list",
-          "椅子は出席しています。配送リストに私はいません",
-          "椅子在出席。送货单上没有我",
-        ],
-        [
-          "The elevator has accepted the meeting and declined the passengers",
-          "エレベーターは会議を承諾し、乗客を辞退しました",
-          "电梯接受了这场会，拒绝了乘客",
-        ],
-      ],
-      [
-        [
-          "I am on the way. The way has a calendar of its own",
-          "向かっています。道のほうにもカレンダーがあります",
-          "我在路上。路自己也有一份日历",
-        ],
-        [
-          "Facilities has marked me as furniture, which does not attend live",
-          "施設管理が私を備品に分類しました。備品はリアルタイムで出席しません",
-          "行政把我归进了家具。家具不实时出席",
-        ],
-        [
-          "I would join by map pin, but the pin is in a different city of the floor plan",
-          "地図のピンで参加したいのですが、ピンは平面図の別都市にあります",
-          "我想用地图钉参加，可钉子落在平面图的另一座城市",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Please start. I am geographically sincere and physically elsewhere",
-            "始めてください。地理的には誠実で、物理的には別の場所です",
-            "你们先开。地理上我很真诚，物理上我在别处",
-          ],
-          [
-            "I will attend as a dot on the map. The dot is punctual",
-            "地図上の点として出席します。点は時間に正確です",
-            "我会作为地图上的一个点出席。点很守时",
-          ],
-          [
-            "Hold the meeting. I will hold the hallway",
-            "会議はお持ちください。廊下は私が持ちます",
-            "会你们开。走廊我来守着",
-          ],
-        ],
-        boss: [
-          [
-            "Consider the chair a delegate. It has never spoken over anyone",
-            "椅子を代理と見なしてください。誰の話も遮ったことがありません",
-            "请把椅子视为代表。它从没打断过任何人",
-          ],
-          [
-            "I will report in once I rejoin the correct week",
-            "正しい週に戻ったら、報告します",
-            "等我回到正确的那一周，我就汇报",
-          ],
-          [
-            "Please proceed. My absence is a facilities issue, according to facilities",
-            "進めてください。欠席は施設の問題です。施設がそう言っています",
-            "请先开。我的缺席是行政问题。行政自己这么说的",
-          ],
-        ],
-        team: [
-          [
-            "If a chair joins muted, that is the delegate. Be kind to it",
-            "ミュートの椅子が入ったら、代理です。やさしくしてください",
-            "如果一把静音的椅子进来了，那是代表。请对它好一点",
-          ],
-          [
-            "I'll annotate from the stairwell between days",
-            "日と日のあいだの階段から、書き込みます",
-            "我会从两天之间的楼梯间做批注",
-          ],
-          [
-            "Go ahead. I already gave my steps to the meeting",
-            "進めてください。歩数は、すでに会議へ渡してあります",
-            "你们开吧。步数我已经交给这场会了",
-          ],
-        ],
-        client: [
-          [
-            "A version of me with a location will follow up. This one is in transit between floors of time",
-            "場所のあるほうの私が追って連絡します。今の私は、時間の階と階のあいだです",
-            "有坐标的那个我稍后联系。现在这个，在时间的楼层之间",
-          ],
-          [
-            "Please begin without the corridor. It had too many opinions",
-            "廊下なしで始めてください。意見が多すぎました",
-            "请在没有走廊的情况下开始。走廊的意见太多了",
-          ],
-          [
-            "You will receive the work from a person who has found the building",
-            "建物を見つけた人から、成果が届きます",
-            "成果会由一个找到了大楼的人交给您",
-          ],
-        ],
-      }
-    ),
-  };
-
-  var equipment = {
-    plausible: family(
-      "equipment",
-      [
-        [
-          "This laptop is installing an update it described as quick",
-          "この端末が、「すぐ終わる」と書いた更新を入れています",
-          "这台电脑正在安装一个自称很快的更新",
-        ],
-        [
-          "The headset is in a room I can see and cannot use",
-          "ヘッドセットは、見えて使えない部屋にあります",
-          "耳机在一个看得见、进不去的房间里",
-        ],
-        [
-          "The camera on this machine has retired, effective today",
-          "この端末のカメラは、本日付で引退しました",
-          "这台机器的摄像头今天退休，立即生效",
-        ],
-        [
-          "Audio from my side would be a guess the {meeting} does not need",
-          "こちらの音声は推測になり、{meeting}には不要です",
-          "我这边的声音只会是猜测，这场{meeting}不需要",
-        ],
-      ],
-      [
-        [
-          "I tested it. The test was the optimistic one",
-          "試しました。楽観的だったのは試験のほうです",
-          "我试过了。比较乐观的是那次测试",
-        ],
-        [
-          "Restarting it would become the meeting",
-          "再起動すると、再起動が会議になります",
-          "重启它的话，重启就会变成这场会",
-        ],
-        [
-          "I can type. That is the channel that still answers",
-          "打てます。返事をする経路はそれだけです",
-          "我还能打字。还肯回话的信道只剩这条",
-        ],
-      ],
-      {
-        any: [
-          [
-            "I would attend as a silent tile, and nobody asked for that",
-            "無言の画面として出られますが、頼まれてはいません",
-            "我可以作为一个不说话的小窗出席，没有人点过这个",
-          ],
-          [
-            "My microphone has declined on my behalf",
-            "マイクが、私の代理で辞退しました",
-            "麦克风已经替我拒绝了",
-          ],
-          [
-            "I will put it in writing, which is the version you can hear",
-            "文章にします。聞こえるのは、その版です",
-            "我写成文字。听得见的是那一版",
-          ],
-        ],
-        boss: [
-          [
-            "The point will reach you in text, which boots faster than this laptop",
-            "要点は文章で届きます。この端末より起動が速いです",
-            "要点用文字送到。文字比这台电脑启动快",
-          ],
-          [
-            "I will not make you watch a negotiation with a settings panel",
-            "設定画面との交渉は、お見せしません",
-            "我不会让您看着我和设置面板谈判",
-          ],
-          [
-            "Please go ahead. I will send the version that has sound",
-            "進めてください。音のある版を送ります",
-            "请先开。有声音的那一版我来发",
-          ],
-        ],
-        team: [
-          [
-            "I refuse to be the frozen face in the corner",
-            "隅で固まった顔には、なりません",
-            "我拒绝当角落里那张卡住的脸",
-          ],
-          [
-            "I'll put my part in the thread, fully loaded",
-            "自分の分はスレッドに置きます。読み込みは終わっています",
-            "我把自己的部分放到消息里，已经加载完",
-          ],
-          [
-            "The update can attend. It says it is almost done",
-            "更新に出てもらいます。本人はもうすぐ終わると言っています",
-            "让更新去参加。它自称马上好",
-          ],
-        ],
-        client: [
-          [
-            "I will send a note you can actually hear",
-            "きちんと聞こえるメモを送ります",
-            "我会发一封您确实听得见的说明",
-          ],
-          [
-            "A working camera is not something I can offer this hour",
-            "この時間にご用意できるものの中に、動くカメラはありません",
-            "这个小时我能拿出的东西里，不包括一个能用的摄像头",
-          ],
-          [
-            "You should have the content without the troubleshooting",
-            "トラブル対応のつかない中身を、お渡しします",
-            "您会拿到内容，不附带故障排查",
-          ],
-        ],
-      }
-    ),
-    suspicious: family(
-      "equipment",
-      [
-        [
-          "My laptop is awake. The part that joins meetings is not",
-          "端末は起きています。会議に入る部分は寝ています",
-          "电脑醒着。负责开会的那一部分在睡",
-        ],
-        [
-          "The {meeting} link opened a calendar, and the calendar opened another link",
-          "{meeting}のリンクがカレンダーを開き、カレンダーが別のリンクを開きました",
-          "这场{meeting}的链接打开了日历，日历又打开了另一个链接",
-        ],
-        [
-          "I have headphones on. They are paired to a different week",
-          "ヘッドホンは付けています。ペアリング先は別の週です",
-          "耳机戴上了。它配对的是另一周",
-        ],
-        [
-          "The camera shows a room I was in earlier, and it will not refresh",
-          "カメラは、さっきまでいた部屋を映したまま更新しません",
-          "摄像头还停在我刚才那间房间，并且拒绝刷新",
-        ],
-      ],
-      [
-        [
-          "I have turned it off and on. It remembered the off",
-          "切って、入れました。オフのほうを覚えていました",
-          "我关过也开过。它记住的是关",
-        ],
-        [
-          "The spinner is the only attendee with a perfect record",
-          "読み込み中のくるくるだけが、皆勤です",
-          "转圈是唯一全勤的出席者",
-        ],
-        [
-          "Sound is working for everyone who is not me",
-          "音が出ているのは、私以外の全員です",
-          "除了我，所有人的声音都是好的",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Please start. I would only contribute buffering",
-            "始めてください。貢献できるのはバッファリングだけです",
-            "你们先开。我能贡献的只有缓冲",
-          ],
-          [
-            "I will send words, which do not need a codec",
-            "言葉を送ります。コーデックは不要です",
-            "我发文字。文字不需要编解码",
-          ],
-          [
-            "Assume I nodded. The camera missed it on purpose",
-            "うなずいたと見なしてください。カメラは意図的に見逃しました",
-            "请默认我点了头。摄像头是故意没拍到",
-          ],
-        ],
-        boss: [
-          [
-            "You will get the substance without the spinning wheel",
-            "くるくるなしで、中身はお渡しします",
-            "您会拿到正事，不附带那个转圈",
-          ],
-          [
-            "I will not add a frozen portrait to your meeting",
-            "止まった肖像は、会議に足しません",
-            "我不会往您的会里再加一张冻住的肖像",
-          ],
-          [
-            "Please go ahead. The laptop is attending a meeting of its own",
-            "進めてください。端末は、自分の会議に出ています",
-            "请先开。这台电脑在开它自己的会",
-          ],
-        ],
-        team: [
-          [
-            "I'll post in the thread like a person who has audio",
-            "音声がある人のように、スレッドへ書きます",
-            "我会像一个有声音的人那样，把话写进消息里",
-          ],
-          [
-            "If my tile appears, it is the laptop. It does not have the context",
-            "画面に私が出たら、端末です。文脈は持っていません",
-            "如果我的小窗出现了，那是电脑。它没有上下文",
-          ],
-          [
-            "Go ahead. I am one restart away from being useful, and I will not take it",
-            "進めてください。再起動一つで役に立つ距離ですが、押しません",
-            "你们开吧。我离有用只差一次重启，而我不会按下去",
-          ],
-        ],
-        client: [
-          [
-            "I can offer a written version that loads",
-            "読み込める文章版なら、ご用意できます",
-            "能加载出来的书面版，我可以提供",
-          ],
-          [
-            "Please do not wait on a camera that is showing last Tuesday",
-            "先週の火曜を映しているカメラは、待たないでください",
-            "请别等一个还停在上周二的摄像头",
-          ],
-          [
-            "You should hear the answer from something other than this microphone",
-            "このマイク以外から、答えが聞こえるほうがよいです",
-            "答案最好从这只麦克风以外的地方传到您那里",
-          ],
-        ],
-      }
-    ),
-    absurd: family(
-      "equipment",
-      [
-        [
-          "My microphone only speaks in calendar notifications",
-          "マイクが発する言葉は、カレンダー通知だけです",
-          "我的麦克风只会说日历通知",
-        ],
-        [
-          "The laptop joined the {meeting} without me and is doing fine",
-          "端末が私なしで{meeting}に入り、順調です",
-          "电脑没带我进了这场{meeting}，而且状态很好",
-        ],
-        [
-          "I updated the updater. Both of us now need a moment",
-          "更新するための更新を入れました。両者とも、少し時間が要ります",
-          "我更新了负责更新的那个东西。我们两个都需要一会儿",
-        ],
-        [
-          "The camera has unionized and will not cross a loading bar",
-          "カメラが組合を作り、読み込みバーを越えなくなりました",
-          "摄像头组建了工会，拒绝越过加载条",
-        ],
-      ],
-      [
-        [
-          "Technical support is me, and I have declined the ticket",
-          "技術サポートは私で、そのチケットは辞退しました",
-          "技术支持就是我，而我拒绝了这张工单",
-        ],
-        [
-          "The device is in a meeting with the network. I was not invited",
-          "端末はネットワークと会議中です。私は招待されていません",
-          "设备和网络正在开会。没有邀请我",
-        ],
-        [
-          "I can hear you. You should be grateful you cannot hear the laptop",
-          "そちらは聞こえています。端末が聞こえないのは、幸いです",
-          "我听得见你们。你们听不见这台电脑，是幸运",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Please start. My bandwidth is attending a longer meeting",
-            "始めてください。帯域は、もっと長い会議に出ています",
-            "你们先开。我的带宽在参加一场更长的会",
-          ],
-          [
-            "I will contribute in plain text, which has no driver",
-            "プレーンテキストで貢献します。ドライバが要りません",
-            "我用纯文本做贡献。纯文本没有驱动",
-          ],
-          [
-            "The laptop sends its regrets, and I am the regrets",
-            "端末が欠席の連絡を出しました。その欠席が私です",
-            "电脑发来了歉意。那份歉意就是我",
-          ],
-        ],
-        boss: [
-          [
-            "You will receive a memo from the only component still taking instruction",
-            "指示をまだ受ける部品から、メモが届きます",
-            "您会收到一份备忘，来自还肯听指令的那个零件",
-          ],
-          [
-            "Please treat the silence as a successful mute, managed by the hardware",
-            "この沈黙は、ハードウェアが管理する成功したミュートです",
-            "这段沉默是硬件管理的一次成功静音",
-          ],
-          [
-            "I approve the meeting. The camera has filed a dissent",
-            "会議は承認します。カメラが反対意見を出しました",
-            "会我批准。摄像头提交了异议",
-          ],
-        ],
-        team: [
-          [
-            "If a laptop joins without a face, offer it the notes and nothing else",
-            "顔のない端末が入ったら、議事だけ渡してください",
-            "如果一台没有脸的电脑进来了，只给它纪要",
-          ],
-          [
-            "I'll type from the side of the update that still likes me",
-            "まだ私を嫌っていないほうの更新の脇から、打ちます",
-            "我会在还没讨厌我的那一侧更新旁边打字",
-          ],
-          [
-            "Go ahead. My tile is unionized and will not cross the call",
-            "進めてください。私の画面は組合に入り、通話を越えません",
-            "你们开吧。我的小窗加入了工会，拒绝越过这通电话",
-          ],
-        ],
-        client: [
-          [
-            "A human-readable follow-up is the most advanced format available",
-            "人が読める追っての連絡が、今いちばん高度な形式です",
-            "人能读的后续说明，是目前最先进的格式",
-          ],
-          [
-            "Please do not wait for a device that has its own offsite",
-            "自分の合宿を持っている端末は、待たないでください",
-            "请别等一台自己有团建的设备",
-          ],
-          [
-            "You will get the answer from me, not from the spinner",
-            "答えは私から届きます。くるくるからではありません",
-            "答案由我交给您，不是由那个转圈交给您",
-          ],
-        ],
-      }
-    ),
-  };
-
-  var agenda = {
-    plausible: family(
-      "agenda",
-      [
-        [
-          "The agenda for the {meeting} is \"agenda TBD\", which I am treating as done",
-          "{meeting}の議題は「議題未定」です。完了として扱います",
-          "这场{meeting}的议程是「议程待定」。我把它视为已经完成",
-        ],
-        [
-          "There is no agenda, and I have already attended that meeting",
-          "議題がありません。その会議には、もう出たことがあります",
-          "没有议程。那种会，我参加过了",
-        ],
-        [
-          "Everything on the invite would arrive sooner as a message",
-          "招待に書いてあることは、メッセージなら先に着きます",
-          "邀请上这些事，写成消息会到得更早",
-        ],
-        [
-          "The {meeting} is optional on the invite and mandatory only in the air",
-          "{meeting}は招待の上では任意で、空気の中だけ必須です",
-          "这场{meeting}在邀请里是自愿的，只在气氛里是必须的",
-        ],
-      ],
-      [
-        [
-          "I looked for a decision that needs me live, and did not find one",
-          "その場の私が要る決定を探して、見つかりませんでした",
-          "我找了一下有没有必须我在场的决定，没找到",
-        ],
-        [
-          "A short note can do the work the hour was going to point at",
-          "短いメモが、この一時間が指さそうとしていた仕事をします",
-          "一段短说明，就够做完这一小时要办的事",
-        ],
-        [
-          "I have prepared the silence I would have contributed",
-          "貢献するはずだった沈黙は、用意してあります",
-          "我本来会贡献的那段沉默，已经备好了",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Send the notes. I will disagree on time, if there is a reason",
-            "議事を送ってください。理由があれば、時間どおりに反対します",
-            "把纪要发来。有理由的话，我会准时反对",
-          ],
-          [
-            "Please do this in writing. That version has an ending",
-            "文章で進めてください。終わりがあるのは、その版です",
-            "请用文字推进。有结尾的是那一版",
-          ],
-          [
-            "I decline the live part and accept the document",
-            "その場の部分は辞退し、文書は受け取ります",
-            "现场的部分我辞了，文档我收",
-          ],
-        ],
-        boss: [
-          [
-            "I will send my view in a form that has a chance of being short",
-            "短くなる可能性のある形で、見解を出します",
-            "看法我会写成还有机会变短的形式",
-          ],
-          [
-            "You can have the answer without a meeting for the answer",
-            "答えのための会議なしで、答えだけお渡しできます",
-            "不必为了答案再开一场，答案本身可以给你",
-          ],
-          [
-            "Please go ahead. I will read the outcome and not schedule a sequel",
-            "進めてください。結果は読みます。続編は入れません",
-            "请先开。我会读结果，并且不安排续集",
-          ],
-        ],
-        team: [
-          [
-            "Three lines will do, whether you hold the room or not",
-            "部屋を使うかどうかは別として、三行で足ります",
-            "房间开不开都行，三行就够",
-          ],
-          [
-            "I'll comment on the doc, which is the meeting I was hoping for",
-            "文書にコメントします。望んでいた会議は、そちらです",
-            "我会在文档里评论。我希望的那场会，就是那份文档",
-          ],
-          [
-            "If you want the room, take it. I want the notes",
-            "部屋が要るなら使ってください。私は議事が要ります",
-            "你们要房间就用。我要的是纪要",
-          ],
-        ],
-        client: [
-          [
-            "I will reply with the points that are actually points",
-            "要点と呼べるものだけ、返信します",
-            "我只回复那些确实算要点的点",
-          ],
-          [
-            "A note will be faster than the {meeting}, and easier to forward",
-            "メモのほうが{meeting}より速く、転送も楽です",
-            "一封说明会比这场{meeting}更快，也更好转发",
-          ],
-          [
-            "Please take this as a yes to the work and a no to the call",
-            "仕事には賛成、通話には辞退、で受け取ってください",
-            "请当成：事情我接，这通电话我辞",
-          ],
-        ],
-      }
-    ),
-    suspicious: family(
-      "agenda",
-      [
-        [
-          "The {meeting} has an agenda, and the agenda is the phrase \"quick sync\"",
-          "{meeting}に議題はあります。議題は「クイックシンク」という語です",
-          "这场{meeting}有议程。议程就是「快速同步」这四个字",
-        ],
-        [
-          "I have been to this meeting. It was wearing a different title",
-          "この会議には出たことがあります。別の件名を着ていました",
-          "这场会我去过。它当时穿着另一个标题",
-        ],
-        [
-          "The only decision on the invite is whether to have the {meeting}",
-          "招待にある決定事項は、{meeting}をやるかどうかだけです",
-          "邀请上唯一的决定，是这场{meeting}开不开",
-        ],
-        [
-          "Twelve people are optional, which is a kind of answer",
-          "十二人が任意です。あれも一つの答えです",
-          "十二个人都是可选的。这也是一种答案",
-        ],
-      ],
-      [
-        [
-          "I searched the invite for a verb. I found calendar nouns",
-          "招待から動詞を探しました。見つかったのは予定の名詞です",
-          "我在邀请里找动词。找到的是日程名词",
-        ],
-        [
-          "A message already contains the meeting. The meeting does not",
-          "メッセージのほうには会議が入っています。会議のほうには入っていません",
-          "消息里已经有这场会了。这场会里还没有",
-        ],
-        [
-          "I prepared remarks. They were three words, and they did not need a room",
-          "発言を用意しました。三語で、部屋は不要でした",
-          "我准备了发言。一共三个词，不需要房间",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Please send the sentence this hour was going to become",
-            "この一時間がなるはずだった一文を、送ってください",
-            "请把这一小时本来会变成的那句话发给我",
-          ],
-          [
-            "I accept the agenda and decline the gathering",
-            "議題は受諾し、集まることだけ辞退します",
-            "议程我接受，聚在一起我辞",
-          ],
-          [
-            "We can pretend I asked the insightful question. It was \"why live\"",
-            "鋭い質問はしたことにしてください。「なぜリアルタイムか」です",
-            "就当我问过那个尖锐的问题。问题是「为什么要实时」",
-          ],
-        ],
-        boss: [
-          [
-            "I will answer the question the meeting has not written down yet",
-            "会議がまだ書いていない質問に、答えます",
-            "会还没写下来的那个问题，我来答",
-          ],
-          [
-            "You can have a recommendation without a round of introductions",
-            "自己紹介の一周なしで、提案だけ出せます",
-            "不必轮流自我介绍，建议可以直接给",
-          ],
-          [
-            "Please take the decision. The agenda will not grow a decision on its own",
-            "決定はお取りください。議題は自分では決定を育てません",
-            "决定请您来做。议程自己长不出决定",
-          ],
-        ],
-        team: [
-          [
-            "Post the question. I will answer it before the room gets comfortable",
-            "質問を書いてください。部屋が落ち着く前に答えます",
-            "把问题发出来。我会在房间还没坐热之前回答",
-          ],
-          [
-            "I'll edit the doc. That is the sync, without the sync",
-            "文書を直します。シンクなしのシンクです",
-            "我来改文档。那是一次没有同步的同步",
-          ],
-          [
-            "If it could be a message, I will meet you in the message",
-            "メッセージで済むなら、メッセージのほうで会いましょう",
-            "如果一条消息就够，我们就在消息里见",
-          ],
-        ],
-        client: [
-          [
-            "I will answer in a form you can forward without calling it a meeting",
-            "会議と呼ばずに転送できる形で、答えます",
-            "我会用一种转发时不必称之为会议的形式来答",
-          ],
-          [
-            "The work is welcome. The assembly around the work can wait",
-            "仕事は歓迎です。仕事の周囲の集会は、待てます",
-            "事情我接。围着事情的集合可以再等等",
-          ],
-          [
-            "Please read this as attention to the point, not distance from it",
-            "要点から離れたのではなく、要点を見ていると読んでください",
-            "请读成我在看要点，而不是离要点很远",
-          ],
-        ],
-      }
-    ),
-    absurd: family(
-      "agenda",
-      [
-        [
-          "The agenda is a link to the agenda, and the link is this {meeting}",
-          "議題は議題へのリンクで、そのリンクがこの{meeting}です",
-          "议程是一个指向议程的链接，那个链接就是这场{meeting}",
-        ],
-        [
-          "I attended the pre-meeting. The meeting was the pre-meeting for another pre-meeting",
-          "事前会議に出ました。その会議は、別の事前会議の事前会議でした",
-          "我参加了预备会。那场会是另一场预备会的预备会",
-        ],
-        [
-          "The {meeting} exists so the calendar does not look empty, and the calendar looks fine",
-          "{meeting}はカレンダーを空に見せないためにあり、カレンダーはもう平気そうです",
-          "这场{meeting}是为了不让日历显得空。日历看起来已经没事了",
-        ],
-        [
-          "Every item is \"align\", and I am already parallel to the floor",
-          "項目はすべて「揃える」です。私はすでに床と平行です",
-          "每一项都是「对齐」。我已经和地板平行了",
-        ],
-      ],
-      [
-        [
-          "I brought a decision. The agenda asked me to leave it outside",
-          "決定を持っていきました。議題に、外に置いてくるよう言われました",
-          "我带了一个决定。议程让我把它放在门外",
-        ],
-        [
-          "The meeting can be an email. The email can be a sentence. The sentence can be no",
-          "会議はメールになれます。メールは一文になれます。一文は「否」になれます",
-          "这场会可以是一封邮件。邮件可以是一句话。这句话可以是「不」",
-        ],
-        [
-          "I read the agenda until it became a haiku, and the haiku declined",
-          "議題を読んでいるうちに俳句になり、俳句が辞退しました",
-          "议程我读着读着变成了俳句，俳句拒绝出席",
-        ],
-      ],
-      {
-        any: [
-          [
-            "Please send the verb. I will bring my own noun",
-            "動詞を送ってください。名詞は持参します",
-            "请把动词发来。名词我自备",
-          ],
-          [
-            "I move to adjourn a meeting that has not found its purpose",
-            "目的を見つけていない会議の閉会を提案します",
-            "我提议一场还没找到目的的会现在闭会",
-          ],
-          [
-            "Consider me aligned, perpendicular, and elsewhere",
-            "方向は揃い、角度は直角、所在は別、でお願いします",
-            "方向已对齐，角度是垂直，人在别处",
-          ],
-        ],
-        boss: [
-          [
-            "I support the outcome. I have not been shown one, so this is advance work",
-            "結果には賛成です。まだ見せられていないので、先行作業です",
-            "我支持结果。还没人给我看结果，所以这是提前作业",
-          ],
-          [
-            "You may record my vote as present in spirit, absent in calendar",
-            "票は「精神は出席、カレンダーは欠席」で記録してください",
-            "我的票可以记成：精神出席，日历缺席",
-          ],
-          [
-            "Please end on time, including the time before it starts",
-            "開始前の時間も含めて、時間どおりに終えてください",
-            "请准时结束，包括它开始之前的那段时间",
-          ],
-        ],
-        team: [
-          [
-            "I'll be in the doc, aligning the headings with reality",
-            "文書の中で、見出しを現実と揃えています",
-            "我在文档里，把标题和现实对齐",
-          ],
-          [
-            "If anyone finds an agenda item with a verb, tag me",
-            "動詞のある議題を見つけたら、私を呼んでください",
-            "谁要是找到一个带动词的议程项，叫我",
-          ],
-          [
-            "We can sync by not syncing. I am free for that",
-            "揃えないことで揃えられます。その枠は空いています",
-            "我们可以通过不对齐来对齐。那个时段我有空",
-          ],
-        ],
-        client: [
-          [
-            "I am aligned with the work and perpendicular to the invitation",
-            "仕事とは平行で、招待とは直角です",
-            "我和事情平行，和这封邀请垂直",
-          ],
-          [
-            "A sentence from me will contain more agenda than the agenda",
-            "私からの一文のほうが、議題より議題を含みます",
-            "我写的一句话，会比议程更像议程",
-          ],
-          [
-            "Please take the hour back. The purpose and I will meet in writing",
-            "一時間はお返しください。目的とは文章で会います",
-            "这个小时请收回。目的和我会在文字里见面",
-          ],
-        ],
-      }
-    ),
-  };
-
-  var families = {
-    plausible: [
-      calendar.plausible,
-      overlap.plausible,
-      logistics.plausible,
-      equipment.plausible,
-      agenda.plausible,
-    ],
-    suspicious: [
-      calendar.suspicious,
-      overlap.suspicious,
-      logistics.suspicious,
-      equipment.suspicious,
-      agenda.suspicious,
-    ],
-    absurd: [
-      calendar.absurd,
-      overlap.absurd,
-      logistics.absurd,
-      equipment.absurd,
-      agenda.absurd,
-    ],
-  };
 
   root.EXCUSES = {
     meetings: [
@@ -1753,8 +12,596 @@ var EXCUSES = (function (root) {
     ],
     tones: ["plausible", "suspicious", "absurd"],
     audiences: ["any", "boss", "team", "client"],
-    shapes: 3,
-    families: families,
+    lines: {
+      plausible: {
+        en: [
+          "The meeting before the {meeting} is still going. I'll read the notes when it actually ends.",
+          "A hold I put on my own calendar is sitting on this hour. It will not move.",
+          "Two invites want this hour, and I already answered the earlier one.",
+          "If I leave the call I'm in, both conversations get worse.",
+          "Something I promised to finish before this slot is still on the screen.",
+          "I'm in the other building. By the time I arrive, the useful part will be over.",
+          "My badge opens every door except the one for the {meeting}.",
+          "This laptop is installing an update it described as quick. It was optimistic.",
+          "The headset is in a room I can see and cannot enter.",
+          "The agenda still says TBD, so I'm treating the {meeting} as done.",
+          "Everything on the invite would get there sooner as a message.",
+          "The {meeting} is marked optional. I'm taking the option.",
+          "This slot was going to borrow time from lunch. Lunch is keeping it.",
+          "A thread marked urgent opened a few minutes ago, and it believes itself.",
+          "The review that started late has not heard that it should end.",
+          "Transit is late. I can send the follow-up, not attend the hour.",
+          "I stepped out for one document. The document became a corridor.",
+          "The block before this one changed its name instead of ending.",
+          "I can put the point in writing. I can't be in two rooms.",
+          "The camera stopped this morning. A note will be clearer than a black tile.",
+          "Audio from my side would be a guess. The {meeting} doesn't need one.",
+          "I looked for a decision that needs me live. There isn't one.",
+          "I'll be free when the earlier call admits it's over. That isn't a time on the clock.",
+          "I'm on the way in, and the way in has the rest of this hour.",
+          "I have to sign for something in this exact window. It will not wait.",
+          "An earlier commitment is already on this slot. It got here first.",
+          "Last time's notes cover this. I'll comment there.",
+          "The hours on either side are full. This one didn't get a chair.",
+          "The room changed. I'm still walking to the old one.",
+          "The doc I said I'd read before we meet is still unread. The doc wins.",
+          "This is the only gap I have to send the note I already owe.",
+          "The {meeting} overlaps a call I can't drop. I'll take the outcome instead.",
+          "I put a focus block here on purpose. It is doing the job.",
+          "The earlier meeting has the only headset that works.",
+          "I checked the calendar twice. The conflict is still the conflict.",
+          "I can make the next one. This one belongs to the meeting before it.",
+          "Someone asked for this hour first, and I already said yes.",
+          "The train is between stations. The update can leave from here, and I can't.",
+          "An appointment I can't move landed on the {meeting}.",
+          "The prep isn't finished. I'd rather finish it than show up without it.",
+          "I'm covering a desk through the top of the hour. The desk doesn't dial in.",
+          "A meeting that was supposed to be short is still here at the start of the {meeting}.",
+          "I can do this in writing. The live version doesn't have a job for me.",
+          "My part is three lines. The thread fits them better than the room does.",
+          "I already sent the update this meeting was going to collect.",
+          "The overlap is as long as the {meeting}. There is no remainder.",
+          "I'm in the wrong building for a room on this floor.",
+          "The badge line downstairs is using up the part of me that arrives on time.",
+          "A note I said I'd send first is still unsent. If I join, that note is late too.",
+          "Another thread is due at the same time, and that one has a deadline.",
+          "I'll read the transcript. The transcript is the version with an ending.",
+          "The previous host is still sharing a screen, and I'm still on that calendar.",
+          "A one-off I can't reschedule took the hour.",
+          "Moving the {meeting} would only move the overlap. I'll take the notes.",
+          "I'm on a pickup in this window. I'll read the decisions after.",
+          "The invite has no owner and no outcome. I'll wait for the one that does.",
+          "I can do the work, or I can attend the {meeting}. The work does not fit in the margin.",
+          "A call with a stakeholder moved onto this slot and can't shift. I'll report back.",
+          "I'm already late to the meeting I'm in. I won't be early to the next.",
+          "The only laptop that's on is mid-update. I'll write when it allows it.",
+          "This hour is tentative on one invite and firm on the other. The firm one wins.",
+          "The overrun from the last meeting runs straight into the {meeting}.",
+        ],
+        ja: [
+          "前の会議が伸びていて、{meeting}に役に立つ時刻では着けません。終わってから議事を読みます。",
+          "自分で押さえた予定が、この時間に居座っています。動かせません。",
+          "招待が二つ重なっていて、先に返事したほうを取ります。",
+          "今抜けると、二つの話が両方とも中途半端になります。",
+          "この前に終えると言った仕事が、まだ画面に残っています。",
+          "別の建物にいます。着いたころには、必要な部分が終わっています。",
+          "{meeting}の部屋だけ、入館証が通りません。",
+          "パソコンが「すぐ終わる」更新の途中です。すぐではなさそうです。",
+          "ヘッドセットは見えています。その部屋には入れません。",
+          "議題が未定のままなので、{meeting}は済んだものとして扱います。",
+          "招待に書いてあることは、チャットのほうが早く着きます。",
+          "{meeting}は任意参加です。任意のほうを取ります。",
+          "この時間を昼から借りる予定でした。昼が返してくれません。",
+          "数分前に「急ぎ」の連絡が来て、相手は本気です。",
+          "遅れて始まった確認が、終わるタイミングをまだ知りません。",
+          "電車が遅れています。その場には出られず、あとで補います。",
+          "資料を一枚取りに出たまま、廊下にいます。",
+          "前の予定は終わっていません。件名だけ変わりました。",
+          "文章なら出せます。二つの部屋にはいられません。",
+          "カメラが今朝から映りません。黒い画面より、メモを送ります。",
+          "こちらの音声は推測になります。{meeting}には要りません。",
+          "その場に私が必要な決定を探しました。見当たりません。",
+          "前の通話が終わったと認めたら、空きます。時刻ではありません。",
+          "向かっている途中で、この一時間は道で終わりそうです。",
+          "この時間にちょうど、外せない受け取りがあります。",
+          "{meeting}より先に、動かせない予定が入っています。",
+          "前回の議事で足ります。コメントはそちらに書きます。",
+          "前後が埋まっています。この時間に座る場所がありません。",
+          "会議室が変わりました。古い部屋のほうへまだ歩いています。",
+          "会う前に読むと言った文書が、まだ読み終わっていません。文書が先です。",
+          "返すと約束した文章に使えるのが、この時間だけです。",
+          "{meeting}が、抜けられない通話と重なりました。結果だけ受け取ります。",
+          "自分で入れた集中の予定が、ちゃんと仕事をしています。",
+          "前の会議が、動くヘッドセットを一つ占有しています。",
+          "カレンダーは二度確認しました。重なりは残っています。",
+          "次なら出られます。今回は、前の会議が持っていきました。",
+          "この時間は、先に引き受けたほうがあります。",
+          "電車が駅と駅のあいだです。文章は送れても、人は送れません。",
+          "動かせない約束が、{meeting}の上に落ちています。",
+          "準備が終わっていません。中身のない出席より、準備を先にします。",
+          "この時間は席を空けられない番です。席は会議に出ません。",
+          "短いはずの前の会議が、{meeting}の開始まで残っています。",
+          "文章で足ります。その場の私に、仕事がありません。",
+          "私の分は三行です。部屋よりチャットが向いています。",
+          "この場で集めようとしていた更新は、もう送りました。",
+          "重なりが{meeting}と同じ長さです。残りがありません。",
+          "会議室はこの階で、私は別の建物です。",
+          "下の入館列が長く、時間どおりに着く分はそこで終わります。",
+          "先に送ると言ったメモがまだです。出ると、メモも遅れます。",
+          "同じ時間に、期限のある別件があります。そちらが先です。",
+          "文字起こしを読みます。あちらには終わりがあります。",
+          "前の画面共有が終わっていません。私もその予定の中です。",
+          "動かせない単発が、この時間を取りました。",
+          "{meeting}を動かすと、重なりが動くだけです。議事を受け取ります。",
+          "この時間は送りです。決まったことだけ、あとで見ます。",
+          "主催も、決めることもない招待です。ある版を待ちます。",
+          "仕事はできます。{meeting}と同じ時間にやると、仕事が残りません。",
+          "関係者との通話がこの枠に入って、先方は動かせません。戻って共有します。",
+          "今いる会議にも遅れています。次には早く出られません。",
+          "開いているパソコンが更新中です。終わったら書きます。",
+          "片方は仮の予定で、もう片方は仮ではありません。仮でないほうが残ります。",
+          "前の会議の延長が、そのまま{meeting}にかかっています。",
+        ],
+        zh: [
+          "上一场还没散，这场{meeting}我赶不上有用的那段。散了再看纪要。",
+          "我自己锁上的那段忙，压在这个点上。挪不走。",
+          "两场都要这个小时，我已经回了先到的那份。",
+          "现在退出来，两场都会停在半截。",
+          "我说好会前做完的东西，还在屏幕上。",
+          "我在另一栋。赶到的时候，有用的部分已经过去了。",
+          "门禁卡唯独打不开这场{meeting}的门。",
+          "电脑在装一个自称很快的更新。看起来并不快。",
+          "耳机我看得见，房间我进不去。",
+          "议程还是待定，这场{meeting}我当它开完了。",
+          "邀请上这些事，发消息更快。",
+          "这场{meeting}写的是自愿参加。我选自愿。",
+          "这个点再开会，午饭就没了。午饭留下。",
+          "几分钟前来了条标着紧急的消息，对方很认真。",
+          "迟到开始的评审，还不知道自己该结束。",
+          "车晚了。人到不了，会后我补。",
+          "我出去拿一份材料，人还在走廊里。",
+          "上一场没结束，只是换了个标题。",
+          "写成文字我能交。两个房间我分不了身。",
+          "摄像头从早上起就是黑的。与其给大家一个黑窗，不如写一张说明。",
+          "我这边的声音只会是猜测。这场{meeting}不需要。",
+          "我找了找有没有必须我在场的决定。没有。",
+          "等上一通承认自己结束，我才有空。这不是一个钟点。",
+          "我还在路上。这个小时大概会耗在路上。",
+          "这个点我得签收一个东西，它不等。",
+          "这场{meeting}之前，已经有一个不能动的安排。",
+          "上次的纪要够用。我在那上面写。",
+          "前后都排满了。这个点没有位子。",
+          "会议室换了。我还在往旧的那间走。",
+          "我答应会前看完的文档还没看完。文档优先。",
+          "这个小时是我唯一能把欠的文字还上的空档。",
+          "这场{meeting}和一通不能挂的电话撞了。我收结果。",
+          "我自己排的那段专注，正在干活。",
+          "上一场占着唯一能用的耳机。",
+          "日历我看了两遍。冲突还在。",
+          "下一场我能到。这一场被上一场拿走了。",
+          "这个点我先答应了别人。",
+          "车停在两站中间。文字能发出去，人不能。",
+          "有个推不掉的安排，落在这场{meeting}上。",
+          "准备还没做完。没准备的出席，不如把准备做完。",
+          "这个点我得守着位子。位子自己不会去开会。",
+          "上一场说好很短，一直短到这场{meeting}开始。",
+          "写成文字就够。现场没有要我做的事。",
+          "我的部分就三行，放消息里比放房间里合适。",
+          "这场会想收的更新，我已经发出去了。",
+          "重叠把这场{meeting}占满了。没有剩下的。",
+          "会议室在这层，我在另一栋。",
+          "楼下门禁那队人，把我准时的那部分用完了。",
+          "说好先发的说明还没写。我要是去开会，说明也迟到。",
+          "同一时间有件带着截止时间的事。那件在前。",
+          "我看文字记录。文字记录有结尾。",
+          "上一场的共享屏幕还没停。我也还在那场的时间里。",
+          "一个不能改期的安排，把这个点拿走了。",
+          "挪开这场{meeting}，重叠也跟着挪。我改收纪要。",
+          "这个点我在接人。决定我事后看。",
+          "邀请上没有主持，也没有要决定的事。我等有的那一版。",
+          "活我能干。跟这场{meeting}挤在一起，活就没了。",
+          "有通相关的电话挪到了这个点，对方不能改。我回头同步。",
+          "我现在这场已经迟到了。下一场早不了。",
+          "还能开的那台电脑正在更新。它允许了我就写。",
+          "一边是待定，另一边不是。不是待定的那场留下。",
+          "上一场的延长，延长进了这场{meeting}。",
+        ],
+      },
+      suspicious: {
+        en: [
+          "My calendar double-booked me with myself. I'm in the other one.",
+          "I'm already in a meeting about whether the {meeting} should happen.",
+          "The invite lists two times. I stayed with the one I saw first.",
+          "The previous meeting ended on the calendar and nowhere else.",
+          "A five-minute overlap has been five minutes for a while now.",
+          "I stopped for one hallway question. It formed a quorum.",
+          "Both rooms believe I am in the other one.",
+          "Someone accepted the {meeting} for me. They are busy, and so am I.",
+          "The room number changed while I was walking to the old one.",
+          "I'm badged into the building and not into the {meeting}.",
+          "The agenda is the title, repeated. I'm treating that as the whole meeting.",
+          "I've been to this meeting. Only the title is new.",
+          "The only decision on the invite is whether to hold the {meeting}.",
+          "The laptop is awake. The part that joins meetings is asleep.",
+          "The headphones are still paired to last week.",
+          "I would explain the conflict, but the explanation is booked too.",
+          "The calendar settled this without calling a meeting. I'm following its example.",
+          "I have been about to join since the invite was still on time.",
+          "I can see the meeting room. The meeting room cannot see a reason to open.",
+          "Most of the invite is optional. That already feels like an answer.",
+          "Send the outcome. An outcome is the only thing I can attend twice.",
+          "The loading spinner has perfect attendance. I don't.",
+          "I looked through the invite for a verb. I found the name of a meeting.",
+          "A copy of this hour is already in progress. I'm in that copy.",
+          "The invite moved while I was reading it. I stayed with the old one.",
+          "My microphone declined on my behalf.",
+          "I'm waiting outside my own desk. The door has not agreed.",
+          "The map and the building disagree. I'm with the hallway.",
+          "Sound is working for everyone who isn't me.",
+          "My remark is three words. It does not need a room.",
+          "If I join, you get the version of me that is still on the other call.",
+          "The earlier hold has the better claim. I didn't write the rule, but I'm keeping it.",
+          "I nodded. The camera decided not to see it.",
+          "I'll write the opinion I would have said into the notes.",
+          "The other hold doesn't know this invite, and it was here first.",
+          "Joining would add a second login to a meeting that already has me.",
+          "This meeting needs someone who is only in this meeting.",
+          "The update can attend. It says it is almost done.",
+          "I refuse to be the frozen face in the corner.",
+          "The message already contains the meeting. The meeting does not.",
+          "I'm early for a room that isn't on this floor.",
+          "Transit gave me a delay and called it a seat.",
+          "I'll take the hallway version. It's the short one.",
+          "Count me out of the room and in on the notes.",
+          "The previous meeting is still introducing itself.",
+          "I gave the overlap five more minutes. It accepted them.",
+          "My location is approximate. My absence is exact.",
+          "The laptop is in a meeting of its own.",
+          "I can send a version that loads. This camera can't.",
+          "Don't wait on a camera that is still showing this morning.",
+          "The only place I still have audio is the thread, so I'll answer there.",
+          "The {meeting} is mandatory in the air and optional on the invite. I'm outside.",
+          "I was optional last time. I'm keeping the streak.",
+          "The earlier block will not give up the chair.",
+          "Both bookings have somewhere to be next.",
+          "I'm still in the preamble of a meeting that forgot its title.",
+          "Please send the sentence this hour was going to turn into.",
+          "I'll take the content. I'm declining the gathering.",
+          "I have one question, which is why this is live.",
+          "I'll edit the doc. That is the {meeting}, without the {meeting}.",
+          "If this can be a message, I'll meet you in the message.",
+          "The chair is closer than I am, and it doesn't have to walk.",
+          "I'm one restart away from being useful, and I'm not taking it.",
+          "The other meeting can't find me either. You can start.",
+        ],
+        ja: [
+          "カレンダーが、私を私と二重予約しました。もう一方にいます。",
+          "{meeting}をやるかどうかの会議に、すでに入っています。",
+          "招待の時刻が二つあります。先に見たほうに残ります。",
+          "前の会議は、カレンダーの上でだけ終わりました。",
+          "五分のはずの重なりが、五分のまま伸びています。",
+          "廊下で質問を一つ受けたら、そのまま会議になりました。",
+          "どちらの部屋も、私は向こうにいると思っています。",
+          "誰かが私の代わりに{meeting}を承諾しました。その人も、私も、埋まっています。",
+          "歩いているあいだに、会議室の番号が変わりました。",
+          "建物には入れています。{meeting}には入れていません。",
+          "議題が件名と同じ一文です。会議としては、そこで終わりです。",
+          "同じ会議です。件名だけ新しいです。",
+          "招待にある決定は、{meeting}を開くかどうかだけです。",
+          "パソコンは起きています。会議に入る機能が寝ています。",
+          "イヤホンの接続先が、先週のままです。",
+          "理由は説明したいのですが、説明の時間も埋まっています。",
+          "カレンダーは会議を開かずに決めました。そこは見習います。",
+          "招待がまだ時間どおりだった頃から、入るところです。",
+          "会議室は見えています。開ける気は、会議室のほうにありません。",
+          "任意の人が多すぎます。それ自体が答えです。",
+          "結果なら二箇所で受け取れます。出席は一箇所です。",
+          "読み込み中の表示だけが、皆勤です。",
+          "招待から動詞を探しました。会議の名前しかありません。",
+          "この時間の複製がすでに始まっていて、私はそちらにいます。",
+          "読んでいるあいだに招待が動きました。古いほうに残ります。",
+          "マイクが、私の代わりに欠席しました。",
+          "自席の前で待っています。ドアが納得していません。",
+          "案内図と建物が食い違っています。私は廊下の側です。",
+          "音が出ているのは、私以外です。",
+          "発言は三語で済みます。部屋は要りません。",
+          "入ると、まだ別の通話にいる私が出ます。",
+          "先の予定のほうが、順番は上です。従います。",
+          "うなずきました。カメラは見なかったことにしています。",
+          "言うはずだった意見は、議事に書きます。",
+          "もう一方の予定は、この招待を知りません。先にいたのは向こうです。",
+          "入ると、すでに私がいる会議にログインがもう一つ増えます。",
+          "この会議にだけいる人が、要ると思います。",
+          "更新に出てもらいます。本人はもうすぐ終わると言っています。",
+          "隅で止まった顔には、なりません。",
+          "中身はチャットにすでにあります。会議のほうにはありません。",
+          "この階にない部屋に、早く着きました。",
+          "電車が、席の代わりに遅延を渡してきました。",
+          "廊下で済む版を受け取ります。短いほうです。",
+          "部屋にはいません。議事にはいます。",
+          "前の会議が、まだ自己紹介をしています。",
+          "重なりにあと五分だけ渡しました。受け取られました。",
+          "いる場所はあいまいです。欠席のほうは正確です。",
+          "パソコンが、自分の会議に出ています。",
+          "読み込める文章なら出せます。このカメラは出せません。",
+          "今朝の映像のままのカメラは、待たなくて大丈夫です。",
+          "声が残っているのはチャットなので、そちらで答えます。",
+          "{meeting}は空気の中だけ必須です。私は空気の外にいます。",
+          "前回も任意でした。今回も任意で揃えます。",
+          "先に入っている予定が、席を譲りません。",
+          "どちらの予定にも、次が詰まっています。",
+          "件名を忘れた会議の、前置きにまだいます。",
+          "この一時間がなりたかった一文を、あとでください。",
+          "中身は受け取ります。集まることだけ辞退します。",
+          "質問は一つです。なぜこの場なのか、です。",
+          "文書を直します。{meeting}は、その文書で足ります。",
+          "メッセージで済む話なら、メッセージで会います。",
+          "椅子のほうが近いです。歩かなくていいので、椅子が先です。",
+          "再起動すれば役に立てる距離ですが、押しません。",
+          "もう一方の会議も、私を見つけられていません。先にどうぞ。",
+        ],
+        zh: [
+          "日历把我和我自己订在了同一个时间。我在另一场里。",
+          "我已经在开一场会，议题是这场{meeting}开不开。",
+          "邀请上有两个时间。我留在先看见的那个。",
+          "上一场会只在日历上结束了。",
+          "那个五分钟的重叠，五分钟了有一会儿。",
+          "走廊里有人问了我一句，然后就凑成了一场会。",
+          "两边的房间都以为我在另一边。",
+          "有人替我接受了这场{meeting}。他没空，我也没空。",
+          "我走向原来那间的时候，房间号变了。",
+          "我刷进了大楼，没有刷进这场{meeting}。",
+          "议程和标题是同一句话。作为一场会，到这儿就够了。",
+          "还是那场会。新的只有标题。",
+          "邀请上唯一要决定的，是这场{meeting}开不开。",
+          "电脑醒着。负责开会的那一部分在睡。",
+          "耳机还连着上周。",
+          "我想解释，可解释的时间也被占了。",
+          "日历没开会就做了决定。这一点我照做。",
+          "从邀请还算准时的时候起，我就一直是即将加入。",
+          "我看得见会议室。会议室看不见开门的理由。",
+          "可选的人太多了。这本身就是个答案。",
+          "结果我能收两次。人只能到一次。",
+          "转圈是唯一全勤的。",
+          "我在邀请里找动词。只找到一场会的名字。",
+          "这个小时有一份副本已经开始了。我在那一份里。",
+          "邀请在我读的时候挪了。我留在旧的那场。",
+          "麦克风替我请了假。",
+          "我在自己工位门口等。门还没同意。",
+          "平面图和大楼意见不一致。我站走廊这边。",
+          "除了我，别人的声音都是好的。",
+          "我要说的就三个字。不需要房间。",
+          "我要是进去，进去的是还在另一通电话里的我。",
+          "先占住的那场顺序在前。我照这个来。",
+          "我点了头。摄像头决定没看见。",
+          "我本来会说的那句，写进纪要里。",
+          "另一场并不知道这封邀请。它先到。",
+          "我再进一次，一场已经有我的会会多一个登录。",
+          "这场会需要一个只在这场会里的人。",
+          "让更新去参加。它说自己马上好。",
+          "我拒绝当角落里那张卡住的脸。",
+          "内容已经在消息里。会里还没有。",
+          "我提前到了一间不在这层的房间。",
+          "交通工具没给座位，给了一段晚点。",
+          "我收走廊版。那一版比较短。",
+          "房间里没有我。纪要里有。",
+          "上一场还在做自我介绍。",
+          "我又给重叠五分钟。它收下了。",
+          "人在哪儿说不清。人不在，倒是很清楚。",
+          "电脑在开它自己的会。",
+          "能打开的文字版我可以发。这个摄像头不行。",
+          "还停在今天早上的摄像头，不用等。",
+          "我还剩声音的地方是消息，所以我在那儿答。",
+          "这场{meeting}只在气氛里是必须的。我在气氛外面。",
+          "上次我就是可选的。这次继续。",
+          "先占住的那场不让座。",
+          "两场后面都还有事。",
+          "我还在一场忘了标题的会的开场白里。",
+          "请把这一小时本来会变成的那句话发我。",
+          "内容我收。聚在一起我辞。",
+          "我只有一个问题：为什么要现场。",
+          "我来改文档。这场{meeting}，文档就够了。",
+          "一条消息能说完的，我们就在消息里见。",
+          "椅子比我近。它不用走路，所以椅子优先。",
+          "我离有用只差一次重启，而我不会按。",
+          "另一场会也找不到我。你们先开。",
+        ],
+      },
+      absurd: {
+        en: [
+          "My calendar double-booked me with myself, and the other me already accepted. I'm in the other one.",
+          "The {meeting} accepted itself. I was not consulted.",
+          "A previous version of me is already on the invite. Their notes are better.",
+          "This hour belongs to a recurring event called Do Not. It has never missed.",
+          "I tried to decline. The decline is waiting for approval.",
+          "The meeting before this one is still introducing the meeting before that.",
+          "A short question from this morning appointed a chair and a note-taker.",
+          "I would leave the previous meeting, but it hasn't admitted I'm here, so I can't exit.",
+          "The {meeting} is in a room that exists only on the invite.",
+          "My chair is attending. I was not on the delivery list.",
+          "The elevator accepted the meeting and left the passengers behind.",
+          "My microphone only speaks in calendar notifications.",
+          "The laptop joined the {meeting} without me. It is doing fine.",
+          "The camera will not cross the loading bar.",
+          "The agenda is a link to the agenda, and the link is this {meeting}.",
+          "I went to the pre-meeting. It was the pre-meeting for another pre-meeting.",
+          "The {meeting} was there to keep the calendar from looking empty. The calendar looks fine.",
+          "Every item says align. We are aligned, so the meeting can stay home.",
+          "I brought a decision. The agenda told me to leave it outside.",
+          "This meeting fits in one sentence. The sentence is no.",
+          "I shortened the agenda, and the short version called in absent.",
+          "Time is attending. I'm the optional one.",
+          "The overlap contains another overlap. I'm in the inner one.",
+          "I sent my regrets. The meeting replied with an agenda.",
+          "A blank with my name will attend. It has opinions and no microphone.",
+          "Count me present in the attachments.",
+          "I'm sending the yes in advance. That's the only way I can attend.",
+          "If I appear, that is the other me, and it doesn't get a vote.",
+          "I'll haunt the document, not the call.",
+          "A more presentable copy of me will write later. This one is fully booked.",
+          "You will get the work. The work is not double-booked.",
+          "Please remove the copy of me that can still see a clock.",
+          "The meetings are nested too deep. I can't reach the exit.",
+          "I can attend the recap of the recap. That's my assigned seat.",
+          "Forward only the ending. I collect those.",
+          "My status is blocked. The blocker is a meeting.",
+          "Facilities registered me as furniture. Furniture doesn't speak live.",
+          "I took the stairs between buildings and came out yesterday.",
+          "My out-of-office reply is in a meeting. I am not at my desk.",
+          "A third copy of me would need a chair we don't have.",
+          "My bandwidth is attending a longer meeting.",
+          "The laptop sent a decline. I am that decline.",
+          "Technical support is me, and I closed the ticket.",
+          "The laptop is meeting with the network. I was not invited.",
+          "I support the outcome. I haven't been shown one, so this is early.",
+          "Please mark me present in spirit and absent on the calendar.",
+          "Please end on time, including the time before it starts.",
+          "I'm in the document, making the headings match reality. The meeting can wait.",
+          "If anyone finds an agenda item with a verb, call me.",
+          "We can be aligned by not meeting. I'm free for that.",
+          "I'll take the work. This invitation faces the other way.",
+          "One sentence from me will contain more than the agenda does.",
+          "Please take the hour back. The purpose and I will meet in writing.",
+          "Let the chair represent me. It has never talked over anyone.",
+          "I'll report once I get back to the correct week.",
+          "If a muted chair joins, that's my delegate. Be polite to it.",
+          "I'm there in intention. The rest of me is elsewhere.",
+          "I'll attend as a dot on the map. The dot is on time.",
+          "You hold the meeting. I'll hold the hallway.",
+          "This meeting has not found a purpose. I'm closing it here.",
+          "The direction is settled. The person is in another room.",
+          "My tile has declined to enter the call.",
+        ],
+        ja: [
+          "カレンダーが私を私と二重予約し、もう一人が承諾しました。そちらにいます。",
+          "{meeting}が自分で出席を押しました。私は聞いていません。",
+          "前の版の私が、すでに招待に入っています。議事はあちらのほうが上手です。",
+          "この時間は「入るな」という定例です。一度も休んでいません。",
+          "辞退を出したら、辞退のほうが承認待ちになりました。",
+          "前の会議が、その前の会議をまだ紹介しています。",
+          "今朝の短い質問が、議長と書記を決めてしまいました。",
+          "前の会議を出たいのですが、在席を認められていないので退室できません。",
+          "{meeting}の部屋は、招待状の中にしかありません。",
+          "椅子は出席しています。配送先に私は入っていません。",
+          "エレベーターは会議に乗り、人は見送りました。",
+          "マイクが話すのは、予定の通知だけです。",
+          "パソコンが私を置いて{meeting}に入りました。調子はよさそうです。",
+          "カメラが、読み込みの線を越えるのを断っています。",
+          "議題が議題へのリンクで、そのリンクがこの{meeting}です。",
+          "事前の打ち合わせに出ました。それも、事前のための事前でした。",
+          "{meeting}はカレンダーを空に見せないためのものです。カレンダーはもう平気です。",
+          "議題が全部「認識合わせ」です。認識は合っているので、会は不要です。",
+          "結論を持っていったら、外に置いてくるよう言われました。",
+          "この会議は一文で足ります。その一文は、欠席です。",
+          "議題を短くしたら、短くなったほうが欠席しました。",
+          "時間のほうが出席しています。任意なのは私です。",
+          "重なりの奥に、もう一つの重なりがあります。私はそこにいます。",
+          "欠席を送ったら、議題が返ってきました。",
+          "名前の入った空欄が出席します。意見はあり、マイクはありません。",
+          "添付の中に、私はいます。",
+          "賛成だけ先に出します。出席できる形は、それだけです。",
+          "画面に出たら、それは別の私です。投票はできません。",
+          "入るなら会議ではなく、文書のほうです。",
+          "もう少し整った私が、あとで書きます。今の私は満席です。",
+          "成果は渡します。成果は二重に入っていません。",
+          "まだ時計を見ているほうの私は、招待から外してください。",
+          "会議が何重にもなって、出口まで届きません。",
+          "振り返りの振り返りなら出られます。そこが定位置です。",
+          "終わりだけ転送してください。集めています。",
+          "止まっています。止まっている理由が会議です。",
+          "総務に備品として登録されました。備品はその場で話しません。",
+          "棟と棟のあいだの階段を上がったら、日付が昨日でした。",
+          "不在通知のほうが会議中です。本人は席にいません。",
+          "三人目の私には、ない椅子が要ります。",
+          "回線が、もっと長い会議に出ています。",
+          "パソコンが欠席の連絡を出しました。その欠席が私です。",
+          "問い合わせ先が私で、その問い合わせは断りました。",
+          "端末とネットワークが会議中です。私は呼ばれていません。",
+          "結果には賛成です。まだ見ていないので、フライングです。",
+          "気持ちは出席、カレンダーは欠席、で記録してください。",
+          "始まる前の時間も含めて、時間どおりに終わってください。",
+          "文書の見出しを現実に直しています。会議はそのあとで足ります。",
+          "動詞のある議題が見つかったら、呼んでください。",
+          "会わないことで揃います。その時間は空いています。",
+          "仕事は受けます。この招待とは向きが違います。",
+          "私からの一文のほうが、議題より中身があります。",
+          "この一時間はお返しください。目的とは文章で会います。",
+          "椅子を代理にしてください。人の話を遮ったことがありません。",
+          "正しい週に戻ったら、報告します。",
+          "ミュートの椅子が入ったら、私の代理です。やさしくしてください。",
+          "気持ちはそちらです。身体は別の場所です。",
+          "地図の点として出席します。点は時間どおりです。",
+          "会議はそちらで開いてください。廊下は私が持ちます。",
+          "目的の見つかっていない会議は、ここで閉じます。",
+          "方向は揃いました。人は別の部屋です。",
+          "私の画面は、この通話に入りません。",
+        ],
+        zh: [
+          "日历把我和我自己订重了。另一个我点了接受，我在那场里。",
+          "这场{meeting}自己接受了自己。没有人问过我。",
+          "邀请里坐着上一版的我。纪要比我写得好。",
+          "这个小时属于一个叫「别来」的例会。它从没缺席。",
+          "我点了拒绝。拒绝还在等批准。",
+          "上一场会还在介绍它的上一场会。",
+          "早上一个小问题，已经指定了主持和记录。",
+          "我想退出上一场，可它还没承认我在，所以我退不出去。",
+          "这场{meeting}的房间只写在邀请里。",
+          "椅子在参会。快递单上没有我。",
+          "电梯进了会，人被留在外面。",
+          "麦克风只会念日历通知。",
+          "电脑没带我进了这场{meeting}。它状态很好。",
+          "摄像头拒绝越过那条加载线。",
+          "议程是一个指向议程的链接。那个链接就是这场{meeting}。",
+          "我参加了预备会。那场会也是预备会的预备。",
+          "这场{meeting}是用来填日历的。日历已经满了。",
+          "每一项都是对齐。已经对齐了，会可以不开。",
+          "我带了结论来。议程让我把结论放在门外。",
+          "这场会一句话就够。那句话是：不去。",
+          "议程缩短之后，缩短版请假了。",
+          "时间在参会。可选的是我。",
+          "重叠里面还有一层重叠。我在里面。",
+          "我发了不去，它回我一份议程。",
+          "写着我名字的空位会出席。它有意见，没有麦。",
+          "请把我算在附件里。",
+          "赞成人先交了。能出席的样子只剩这个。",
+          "如果我出现，那是另一个我，不能投票。",
+          "我缠上的是文档，不是这通电话。",
+          "比较能见人的那个我稍后写。现在这个已经排满。",
+          "东西会交。东西没有被订重。",
+          "请把还在看表的那个我移出邀请。",
+          "会套着会，我够不着出口。",
+          "复盘的复盘我可以参加。那是我的固定座位。",
+          "请只转发结尾。我在收集这个。",
+          "状态是堵住了。堵住的原因是一场会。",
+          "行政把我登记成了办公用品。办公用品不当场发言。",
+          "我走了两栋楼之间的楼梯，出来已经是昨天。",
+          "自动回复在开会。本人不在工位。",
+          "第三个我需要一把我们没有的椅子。",
+          "带宽在参加一场更长的会。",
+          "电脑发来了请假。那封请假就是我。",
+          "技术支持是我，这张单我关了。",
+          "电脑和网络在开会，没有叫我。",
+          "结论我赞成。结论我还没看见，所以这是抢跑。",
+          "请记成：人在，日历不在。",
+          "请准时结束，包括它还没开始的那段。",
+          "我在文档里把标题改成现实。会可以等一等。",
+          "谁要是找到一条带动词的议程，叫我。",
+          "不开会就算对齐了。那个时段我有空。",
+          "事情我接。这封邀请和事情不是一个方向。",
+          "我写的一句话，比议程有内容。",
+          "这个小时请收回。目的我们在文字里见。",
+          "请让椅子当代表。它没打断过任何人。",
+          "等我回到正确的那一周，再汇报。",
+          "如果一把静音的椅子进来，那是我的代表。请对它客气。",
+          "人很想在。人其实在别处。",
+          "我作为地图上的一个点出席。点很守时。",
+          "会你们开。走廊我守着。",
+          "这场还没找到目的的会，现在闭会。",
+          "方向齐了。人不在这个房间。",
+          "我的小窗不进这通电话。",
+        ],
+      },
+    },
   };
 
   return root.EXCUSES;
