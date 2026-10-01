@@ -1,0 +1,598 @@
+(function () {
+  "use strict";
+
+  var data = window.EXCUSES;
+  var STORAGE_KEY = "excuse-generator-lang";
+  var SITE_URL = "https://uselesssoso.github.io/excuse-generator/";
+  var X_MAX = 280;
+  var X_URL_LENGTH = 23;
+  var X_RANGES = [
+    [0, 4351, 100],
+    [8192, 8205, 100],
+    [8208, 8223, 100],
+    [8242, 8247, 100],
+  ];
+
+  var lang = loadLang();
+  var current = null;
+  var lastKey = "";
+  var copyTimer = 0;
+
+  var UI = {
+    en: {
+      tagline: ["Generates excuses to skip meetings.", "Results not guaranteed."],
+      title: "excuse-generator — Generates excuses to skip meetings",
+      meeting: "Meeting",
+      believability: "Believability",
+      forWhom: "For",
+      tonePlausible: "Plausible",
+      toneSuspicious: "Suspicious",
+      toneAbsurd: "Absurd",
+      audAny: "Anyone",
+      audBoss: "Boss",
+      audTeam: "Team",
+      audClient: "Client",
+      asDecline: "Write it as a decline",
+      generate: "Generate an excuse",
+      again: "Generate another",
+      hint: "Nothing is sent. The excuse stays in this browser.",
+      onCalendar: "On the calendar",
+      stampEmpty: "Not yet",
+      stampDeclined: "Declined",
+      empty: "Nothing declined yet. The meeting still believes you are coming.",
+      copy: "Copy",
+      copied: "Copied",
+      copyFailed: "Copy failed",
+      copiedStatus: "Copied to the clipboard.",
+      copyFailedStatus: "Could not copy. Select the excuse and copy it yourself.",
+      shareX: "Share on X",
+      share: "Share",
+      signed: "Signed",
+      langLabel: "Language",
+      forBoss: "For your boss",
+      forTeam: "For the team",
+      forClient: "For the client",
+      toAny: "Everyone on the invite",
+      toBoss: "Boss",
+      toTeam: "Team",
+      toClient: "Client",
+      subject: "Decline: {meeting}",
+      closerAny: "Happy to pick it up in writing.",
+      closerBoss: "I will send a short update before the end of the day.",
+      closerTeam: "Please start without me.",
+      closerClient: "I will follow up by email today.",
+      declineLead: "I need to decline the {meeting}.",
+      greeting: "Hi,",
+    },
+    ja: {
+      tagline: ["会議に出ない言い訳、代わりに考えます。", "通るかどうかは上司次第です。"],
+      title: "excuse-generator — 会議に出ない言い訳、代わりに考えます",
+      meeting: "会議",
+      believability: "信ぴょう性",
+      forWhom: "送る相手",
+      tonePlausible: "無難",
+      toneSuspicious: "苦しい",
+      toneAbsurd: "ありえない",
+      audAny: "指定なし",
+      audBoss: "上司",
+      audTeam: "同僚",
+      audClient: "取引先",
+      asDecline: "そのまま送れる文面にする",
+      generate: "言い訳を考える",
+      again: "別の案",
+      hint: "どこにも送信されません。言い訳はこのブラウザの中だけに残ります。",
+      onCalendar: "予定どおり",
+      stampEmpty: "未回答",
+      stampDeclined: "欠席",
+      empty: "まだ欠席の連絡をしていません。会議はあなたが来ると思っています。",
+      copy: "コピー",
+      copied: "コピーしました",
+      copyFailed: "コピー失敗",
+      copiedStatus: "クリップボードにコピーしました。",
+      copyFailedStatus: "コピーできませんでした。文面を選択して手動でコピーしてください。",
+      shareX: "Xでシェア",
+      share: "シェア",
+      signed: "制作",
+      langLabel: "言語",
+      forBoss: "上司宛て",
+      forTeam: "同僚宛て",
+      forClient: "取引先宛て",
+      toAny: "関係者各位",
+      toBoss: "〇〇部長",
+      toTeam: "チームの皆さん",
+      toClient: "〇〇株式会社 〇〇様",
+      subject: "{meeting}欠席のご連絡",
+      subjectClient: "本日のお打ち合わせ欠席のお詫び",
+      closerAny: "決まったことがあれば、あとで共有いただけると助かります。",
+      closerBoss: "内容は議事録で確認し、必要な対応は本日中にご報告いたします。",
+      closerTeam: "先に進めておいてください。私の担当分で何かあれば、チャットでメンションをお願いします。",
+      closerClient: "内容は社内で確認のうえ、ご確認いただきたい点があれば本日中にメールにてご連絡いたします。",
+      declineLead: "",
+      greeting: "",
+    },
+    zh: {
+      tagline: ["帮你编个不去开会的理由。", "领导信不信，不归我们管。"],
+      title: "excuse-generator — 帮你编个不去开会的理由",
+      meeting: "什么会",
+      believability: "可信度",
+      forWhom: "发给谁",
+      tonePlausible: "靠谱",
+      toneSuspicious: "可疑",
+      toneAbsurd: "离谱",
+      audAny: "不限",
+      audBoss: "领导",
+      audTeam: "同事",
+      audClient: "客户",
+      asDecline: "写成能直接发的消息",
+      generate: "给我一个理由",
+      again: "换一个",
+      hint: "什么都不会发出去，理由只留在你的浏览器里。",
+      onCalendar: "日程照旧",
+      stampEmpty: "待回复",
+      stampDeclined: "已拒绝",
+      empty: "还没拒。这个会还以为你会来。",
+      copy: "复制",
+      copied: "已复制",
+      copyFailed: "复制失败",
+      copiedStatus: "已复制，去粘贴吧。",
+      copyFailedStatus: "没复制上，手动选中文字复制一下。",
+      shareX: "分享到 X",
+      share: "分享",
+      signed: "署名",
+      langLabel: "语言",
+      forBoss: "发给领导",
+      forTeam: "发给同事",
+      forClient: "发给客户",
+      toAny: "参会的各位",
+      toBoss: "领导",
+      toTeam: "项目组同事",
+      toClient: "客户",
+      subject: "{meeting}请假",
+      subjectClient: "今天的会议无法参加",
+      closerAny: "有结论的话麻烦同步我一下，我会后跟进。",
+      closerBoss: "有需要我跟进的您随时叫我，会上的内容我会后补上。",
+      closerTeam: "你们先开，有要我做的直接群里@我。",
+      closerClient: "会议内容我会后跟同事对一下，需要确认的事项今天内邮件回复您。",
+      declineLead: "",
+      greeting: "",
+    },
+  };
+
+  var form = document.getElementById("excuse-form");
+  var generateButton = document.getElementById("generate");
+  var againButton = document.getElementById("again");
+  var copyButton = document.getElementById("copy");
+  var shareX = document.getElementById("share-x");
+  var shareButton = document.getElementById("share");
+  var copyStatus = document.getElementById("copy-status");
+  var actions = document.getElementById("actions");
+  var output = document.getElementById("output");
+  var invite = document.getElementById("invite");
+  var asDecline = document.getElementById("as-decline");
+
+  validateData();
+
+  if (navigator.share) shareButton.hidden = false;
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    roll();
+  });
+
+  againButton.addEventListener("click", function () {
+    roll();
+  });
+
+  document.getElementById("lang-switch").addEventListener("click", function (event) {
+    var button = event.target.closest("[data-lang]");
+    if (!button) return;
+    setLang(button.getAttribute("data-lang"));
+  });
+
+  form.addEventListener("change", function () {
+    render();
+  });
+
+  copyButton.addEventListener("click", function () {
+    if (!current) return;
+    copyExcuse();
+  });
+
+  shareButton.addEventListener("click", function () {
+    if (!current) return;
+    shareExcuse();
+  });
+
+  function roll() {
+    var tone = selectedTone();
+    var list = data.lines[tone][lang];
+    var nextIndex = 0;
+    var key = "";
+    var guard = 0;
+    do {
+      nextIndex = Math.floor(rand() * list.length);
+      key = tone + "|" + lang + "|" + nextIndex;
+      guard += 1;
+    } while (key === lastKey && list.length > 1 && guard < 12);
+    lastKey = key;
+    current = { index: nextIndex };
+    render();
+    var reduced = prefersReducedMotion();
+    invite.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
+  }
+
+  function render() {
+    copyStatus.textContent = "";
+    var meeting = selectedMeeting();
+    var audience = selectedAudience();
+    var tone = selectedTone();
+    var bits = [meeting.label[lang], duration(meeting)];
+    if (audience !== "any") bits.push(audienceMeta(audience));
+    text("meta", bits.join(" · "));
+
+    if (!current) {
+      invite.dataset.state = "empty";
+      invite.dataset.tone = "";
+      text("stamp", t("stampEmpty"));
+      text("kicker", t("onCalendar"));
+      output.textContent = t("empty");
+      output.classList.remove("is-memo");
+      actions.hidden = true;
+      shareX.removeAttribute("href");
+      generateButton.textContent = t("generate");
+      return;
+    }
+
+    var built = buildExcuse(tone, meeting);
+    lastKey = tone + "|" + lang + "|" + current.index;
+    invite.dataset.state = "ready";
+    invite.dataset.tone = tone;
+    text("stamp", t("stampDeclined"));
+    text("kicker", toneLabel(tone));
+    var shown = asDecline.checked ? declineMessage(built.text, meeting, audience) : built.text;
+    output.textContent = shown;
+    output.classList.toggle("is-memo", asDecline.checked);
+    actions.hidden = false;
+    generateButton.textContent = t("again");
+    againButton.textContent = t("again");
+    copyButton.textContent = t("copy");
+    shareX.href = xIntentUrl(built.text);
+    shareX.textContent = t("shareX");
+  }
+
+  function buildExcuse(tone, meeting) {
+    var list = data.lines[tone][lang];
+    var index = current.index;
+    if (index >= list.length) index = 0;
+    return { text: fill(list[index], meeting.label[lang]) };
+  }
+
+  function declineMessage(excuse, meeting, audience) {
+    var label = meeting.label[lang];
+    var when = duration(meeting);
+    var to = t("to" + cap(audience));
+    var subject = t("subject").replace("{meeting}", label);
+    var closer = t("closer" + cap(audience));
+    if (lang === "en") {
+      return [
+        "To: " + to,
+        "Subject: " + subject,
+        "When: " + when,
+        "",
+        "Hi,",
+        "",
+        "I need to decline the " + label + ".",
+        "",
+        excuse,
+        "",
+        closer,
+      ].join("\n");
+    }
+    if (lang === "ja") {
+      var jaSubject = audience === "client" ? t("subjectClient") : subject;
+      var ja = ["宛先：" + to, "件名：" + jaSubject, "所要時間：" + when, ""];
+      if (audience === "boss") ja.push("お疲れ様です。", "", "本日の" + label + "、申し訳ありませんが欠席させてください。");
+      else if (audience === "team") ja.push("お疲れ様です。", "", "今日の" + label + "、すみませんが欠席します。");
+      else if (audience === "client") ja.push("いつもお世話になっております。", "", "大変申し訳ございませんが、本日のお打ち合わせは欠席させていただきたく、ご連絡いたしました。");
+      else ja.push("お疲れ様です。", "", "本日の" + label + "は欠席させていただきます。");
+      ja.push("", excuse, "", closer);
+      if (audience === "client") ja.push("ご迷惑をおかけし大変申し訳ございませんが、何卒よろしくお願いいたします。");
+      else if (audience === "boss") ja.push("よろしくお願いいたします。");
+      else ja.push("よろしくお願いします。");
+      return ja.join("\n");
+    }
+    var zhSubject = audience === "client" ? t("subjectClient") : subject;
+    var zh = ["发给：" + to, "事由：" + zhSubject, "时长：" + when, ""];
+    if (audience === "boss") zh.push("领导好，", "", "今天的" + label + "我请个假，参加不了。");
+    else if (audience === "team") zh.push("今天的" + label + "我就不参加了。");
+    else if (audience === "client") zh.push("您好，", "", "非常抱歉，今天的会我这边没法参加了。");
+    else zh.push("各位好，", "", "今天的" + label + "我参加不了，先跟大家说一声。");
+    zh.push("", excuse, "", closer);
+    if (audience === "client") zh.push("给您添麻烦了，谢谢理解。");
+    return zh.join("\n");
+  }
+
+  function copyExcuse() {
+    var value = output.textContent;
+    writeClipboard(value).then(function (ok) {
+      copyButton.textContent = ok ? t("copied") : t("copyFailed");
+      copyStatus.textContent = ok ? t("copiedStatus") : t("copyFailedStatus");
+      window.clearTimeout(copyTimer);
+      copyTimer = window.setTimeout(function () {
+        copyButton.textContent = t("copy");
+        copyStatus.textContent = "";
+      }, 2400);
+    });
+  }
+
+  function shareExcuse() {
+    var built = buildExcuse(selectedTone(), selectedMeeting());
+    var textValue = asDecline.checked ? declineMessage(built.text, selectedMeeting(), selectedAudience()) : built.text;
+    navigator.share({ title: "excuse-generator", text: textValue }).catch(function (error) {
+      if (error && error.name === "AbortError") return;
+      copyExcuse();
+    });
+  }
+
+  function xIntentUrl(excuse) {
+    return "https://x.com/intent/post?text=" + encodeURIComponent(xText(excuse)) + "&url=" + encodeURIComponent(SITE_URL);
+  }
+
+  function xText(excuse) {
+    var budget = X_MAX - X_URL_LENGTH - 1;
+    if (weightedLength(excuse) <= budget) return excuse;
+    var ellipsis = "…";
+    var room = budget - weightedLength(ellipsis);
+    var trimmed = "";
+    var used = 0;
+    var i;
+    for (i = 0; i < excuse.length; ) {
+      var code = excuse.codePointAt(i);
+      var weight = charWeight(code) / 100;
+      if (used + weight > room) break;
+      var step = code > 65535 ? 2 : 1;
+      trimmed += excuse.slice(i, i + step);
+      used += weight;
+      i += step;
+    }
+    trimmed = trimmed.replace(/[ \t]+\S*$/, "").replace(/[。.\s]+$/g, "").trim();
+    if (!trimmed) trimmed = excuse.slice(0, 1);
+    return trimmed + ellipsis;
+  }
+
+  function charWeight(code) {
+    var i;
+    for (i = 0; i < X_RANGES.length; i += 1) {
+      if (code >= X_RANGES[i][0] && code <= X_RANGES[i][1]) return X_RANGES[i][2];
+    }
+    return 200;
+  }
+
+  function weightedLength(value) {
+    var units = 0;
+    var i;
+    for (i = 0; i < value.length; ) {
+      var code = value.codePointAt(i);
+      units += charWeight(code);
+      i += code > 65535 ? 2 : 1;
+    }
+    return units / 100;
+  }
+
+  function writeClipboard(value) {
+    return new Promise(function (resolve) {
+      var settled = false;
+      function finish(ok) {
+        if (settled) return;
+        settled = true;
+        resolve(ok);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(
+          function () { finish(true); },
+          function () { finish(fallbackCopy(value)); }
+        );
+        window.setTimeout(function () {
+          if (!settled) finish(fallbackCopy(value));
+        }, 500);
+        return;
+      }
+      finish(fallbackCopy(value));
+    });
+  }
+
+  function fallbackCopy(value) {
+    var area = document.createElement("textarea");
+    area.value = value;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "0";
+    area.style.left = "-9999px";
+    document.body.appendChild(area);
+    area.select();
+    var ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch (error) {
+      ok = false;
+    }
+    area.remove();
+    return ok;
+  }
+
+  function selectedMeeting() {
+    var id = document.getElementById("meeting").value;
+    var i;
+    for (i = 0; i < data.meetings.length; i += 1) {
+      if (data.meetings[i].id === id) return data.meetings[i];
+    }
+    return data.meetings[0];
+  }
+
+  function selectedTone() {
+    var input = document.querySelector('input[name="tone"]:checked');
+    return input ? input.value : "plausible";
+  }
+
+  function selectedAudience() {
+    var input = document.querySelector('input[name="audience"]:checked');
+    return input ? input.value : "any";
+  }
+
+  function duration(meeting) {
+    if (lang === "ja") return meeting.minutes + "分";
+    if (lang === "zh") return meeting.minutes + "分钟";
+    return meeting.minutes + " min";
+  }
+
+  function audienceMeta(audience) {
+    if (audience === "boss") return t("forBoss");
+    if (audience === "team") return t("forTeam");
+    if (audience === "client") return t("forClient");
+    return "";
+  }
+
+  function toneLabel(tone) {
+    if (tone === "suspicious") return t("toneSuspicious");
+    if (tone === "absurd") return t("toneAbsurd");
+    return t("tonePlausible");
+  }
+
+  function cap(audience) {
+    if (audience === "boss") return "Boss";
+    if (audience === "team") return "Team";
+    if (audience === "client") return "Client";
+    return "Any";
+  }
+
+  function fill(template, label) {
+    return String(template).split("{meeting}").join(label);
+  }
+
+  function text(id, value) {
+    document.getElementById(id).textContent = value;
+  }
+
+  function t(key) {
+    return UI[lang][key];
+  }
+
+  function rand() {
+    if (!rand.fn) {
+      var buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      rand.fn = mulberry32(buf[0]);
+    }
+    return rand.fn();
+  }
+
+  function mulberry32(seed) {
+    var state = seed >>> 0;
+    return function () {
+      state = (state + 0x6d2b79f5) >>> 0;
+      var n = state;
+      n = Math.imul(n ^ (n >>> 15), n | 1);
+      n ^= n + Math.imul(n ^ (n >>> 7), n | 61);
+      return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function loadLang() {
+    try {
+      var stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === "en" || stored === "ja" || stored === "zh") return stored;
+    } catch (error) {
+      return "en";
+    }
+    return "en";
+  }
+
+  function setLang(next) {
+    if (next !== "en" && next !== "ja" && next !== "zh") next = "en";
+    lang = next;
+    try {
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch (error) {
+      /* keep the choice for this visit */
+    }
+    applyStatic();
+  }
+
+  function applyStatic() {
+    document.documentElement.lang = lang === "zh" ? "zh-Hans" : lang;
+    document.title = t("title");
+    var description = t("tagline").join(lang === "en" ? " " : "");
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", description);
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    var group = document.getElementById("lang-switch");
+    group.setAttribute("aria-label", t("langLabel"));
+    group.querySelectorAll("[data-lang]").forEach(function (button) {
+      var on = button.getAttribute("data-lang") === lang;
+      button.setAttribute("aria-checked", on ? "true" : "false");
+      button.classList.toggle("is-on", on);
+    });
+    ["tone", "audience"].forEach(function (name) {
+      var field = document.querySelector('fieldset[data-name="' + name + '"]');
+      if (field) field.setAttribute("aria-label", name === "tone" ? t("believability") : t("forWhom"));
+    });
+    fillMeetings();
+    renderTagline();
+    shareButton.textContent = t("share");
+    render();
+  }
+
+  function fillMeetings() {
+    var select = document.getElementById("meeting");
+    var currentId = select.value || "standup";
+    select.replaceChildren();
+    data.meetings.forEach(function (meeting) {
+      var option = document.createElement("option");
+      option.value = meeting.id;
+      option.textContent = meeting.label[lang];
+      if (meeting.id === currentId) option.selected = true;
+      select.appendChild(option);
+    });
+  }
+
+  function renderTagline() {
+    var el = document.querySelector(".tagline");
+    el.replaceChildren();
+    t("tagline").forEach(function (sentence, index) {
+      if (index > 0 && lang === "en") el.append(document.createTextNode(" "));
+      var line = document.createElement("span");
+      line.className = "tagline-line";
+      line.textContent = sentence;
+      el.append(line);
+    });
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function validateData() {
+    data.tones.forEach(function (tone) {
+      ["en", "ja", "zh"].forEach(function (code) {
+        var list = data.lines[tone] && data.lines[tone][code];
+        if (!list || list.length < 60) throw new Error("short bank " + tone + " " + code);
+        list.forEach(function (line, index) {
+          if (!line || !String(line).trim()) throw new Error("empty " + tone + " " + code + " " + index);
+          if (String(line).indexOf("{") !== -1 && String(line).indexOf("{meeting}") === -1) {
+            throw new Error("bad slot " + tone + " " + code + " " + index);
+          }
+          if (sentenceCount(line, code) > 2) throw new Error("long " + tone + " " + code + " " + index);
+        });
+      });
+    });
+  }
+
+  function sentenceCount(line, code) {
+    var parts = String(line).split(code === "en" ? /[.?!]+/ : /[。？！]+/);
+    return parts.filter(function (part) { return part.trim().length > 0; }).length;
+  }
+
+  applyStatic();
+})();
