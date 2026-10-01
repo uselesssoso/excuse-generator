@@ -110,47 +110,48 @@
       greeting: "",
     },
     zh: {
-      tagline: ["替你想个不去开会的借口。", "成不成另说。"],
-      title: "excuse-generator — 替你想个不去开会的借口",
-      meeting: "会议",
-      believability: "像不像",
-      forWhom: "发给",
+      tagline: ["帮你编个不去开会的理由。", "领导信不信，不归我们管。"],
+      title: "excuse-generator — 帮你编个不去开会的理由",
+      meeting: "什么会",
+      believability: "可信度",
+      forWhom: "发给谁",
       tonePlausible: "靠谱",
       toneSuspicious: "可疑",
       toneAbsurd: "离谱",
       audAny: "不限",
-      audBoss: "上司",
+      audBoss: "领导",
       audTeam: "同事",
       audClient: "客户",
-      asDecline: "写成可以直接发的",
-      generate: "生成一个借口",
-      again: "再来一个",
-      hint: "什么都不会发出去。借口只留在这台浏览器里。",
-      onCalendar: "仍在日历上",
-      stampEmpty: "未辞",
-      stampDeclined: "缺席",
-      empty: "还没辞。这场会仍以为你会到。",
+      asDecline: "写成能直接发的消息",
+      generate: "给我一个理由",
+      again: "换一个",
+      hint: "什么都不会发出去，理由只留在你的浏览器里。",
+      onCalendar: "日程照旧",
+      stampEmpty: "待回复",
+      stampDeclined: "已拒绝",
+      empty: "还没拒。这个会还以为你会来。",
       copy: "复制",
       copied: "已复制",
       copyFailed: "复制失败",
-      copiedStatus: "已复制到剪贴板。",
-      copyFailedStatus: "没复制成。选中文字，自己复制。",
+      copiedStatus: "已复制，去粘贴吧。",
+      copyFailedStatus: "没复制上，手动选中文字复制一下。",
       shareX: "分享到 X",
       share: "分享",
       signed: "署名",
       langLabel: "语言",
-      forBoss: "给上司",
-      forTeam: "给同事",
-      forClient: "给客户",
-      toAny: "各位",
-      toBoss: "上司",
-      toTeam: "各位同事",
+      forBoss: "发给领导",
+      forTeam: "发给同事",
+      forClient: "发给客户",
+      toAny: "参会的各位",
+      toBoss: "领导",
+      toTeam: "项目组同事",
       toClient: "客户",
-      subject: "辞谢：{meeting}",
-      closerAny: "有结论的话，写成文字发我就行。",
-      closerBoss: "结论我今天用文字补上。",
-      closerTeam: "你们先开。",
-      closerClient: "我今天邮件补充。谢谢。",
+      subject: "{meeting}请假",
+      subjectClient: "今天的会议无法参加",
+      closerAny: "有结论的话麻烦同步我一下，我会后跟进。",
+      closerBoss: "有需要我跟进的您随时叫我，会上的内容我会后补上。",
+      closerTeam: "你们先开，有要我做的直接群里@我。",
+      closerClient: "会议内容我会后跟同事对一下，需要确认的事项今天内邮件回复您。",
       declineLead: "",
       greeting: "",
     },
@@ -297,11 +298,14 @@
       if (audience === "client") lines.push("よろしくお願いいたします。");
       return lines.join("\n");
     }
-    var zhVerb = audience === "team" ? "我不参加了。" : audience === "client" ? "我无法参加。" : "我参加不了。";
-    var zhLead = (audience === "client" ? "今天的" : "") + label + "，" + zhVerb;
-    var zh = ["收件人: " + to, "主题: " + subject, "时间: " + when, ""];
-    if (audience === "client") zh.push("您好，", "");
-    zh.push(zhLead, "", excuse, "", closer);
+    var zhSubject = audience === "client" ? t("subjectClient") : subject;
+    var zh = ["发给：" + to, "事由：" + zhSubject, "时长：" + when, ""];
+    if (audience === "boss") zh.push("领导好，", "", "今天的" + label + "我请个假，参加不了。");
+    else if (audience === "team") zh.push("今天的" + label + "我就不参加了。");
+    else if (audience === "client") zh.push("您好，", "", "非常抱歉，今天的会我这边没法参加了。");
+    else zh.push("各位好，", "", "今天的" + label + "我参加不了，先跟大家说一声。");
+    zh.push("", excuse, "", closer);
+    if (audience === "client") zh.push("给您添麻烦了，谢谢理解。");
     return zh.join("\n");
   }
 
