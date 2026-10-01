@@ -233,7 +233,7 @@
     if (!current) {
       invite.dataset.state = "empty";
       invite.dataset.tone = "";
-      showStamp(t("stampEmpty"));
+      text("stamp", t("stampEmpty"));
       text("kicker", t("onCalendar"));
       output.textContent = t("empty");
       output.classList.remove("is-memo");
@@ -247,8 +247,7 @@
     lastKey = tone + "|" + lang + "|" + current.index;
     invite.dataset.state = "ready";
     invite.dataset.tone = tone;
-    if (asDecline.checked) showStamp(t("stampDeclined"));
-    else hideStamp();
+    text("stamp", t("stampDeclined"));
     text("kicker", toneLabel(tone));
     var shown = asDecline.checked ? declineMessage(built.text, meeting, audience) : built.text;
     output.textContent = shown;
@@ -472,18 +471,6 @@
 
   function text(id, value) {
     document.getElementById(id).textContent = value;
-  }
-
-  function showStamp(value) {
-    var stamp = document.getElementById("stamp");
-    stamp.hidden = false;
-    stamp.textContent = value;
-  }
-
-  function hideStamp() {
-    var stamp = document.getElementById("stamp");
-    stamp.hidden = true;
-    stamp.textContent = "";
   }
 
   function t(key) {

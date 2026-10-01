@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>excuse-generator — Generates excuses to skip meetings</title>
     <meta name="description" content="Generates excuses to skip meetings. Results not guaranteed.">
-    <meta name="theme-color" content="#fdfcf9">
+    <meta name="theme-color" content="#e7edf3">
     <meta property="og:title" content="excuse-generator">
     <meta property="og:description" content="Generates excuses to skip meetings. Results not guaranteed.">
     <meta property="og:type" content="website">
@@ -22,22 +22,22 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Noto+Serif+JP:wght@400;600&family=Noto+Serif+SC:wght@400;600&display=swap">
-    <script>
-      try {
-        var saved = localStorage.getItem("excuse-generator-lang");
-        if (saved === "ja" || saved === "zh") {
-          document.documentElement.lang = saved === "zh" ? "zh-Hans" : saved;
-        }
-      } catch (e) {}
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:wght@500;600&family=Noto+Sans+JP:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <p class="watermark" aria-hidden="true">TBD</p>
     <main class="page">
-      <header class="head">
-        <div class="title">
-          <svg class="plug" viewBox="4 11 56 36" width="40" height="26" aria-hidden="true" focusable="false">
+      <header class="masthead">
+        <svg class="mark" viewBox="0 0 64 52" aria-hidden="true">
+          <rect x="6" y="10" width="52" height="38" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M6 20h52" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M18 6v8M46 6v8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M16 30h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M22 36.5l7 5M29 36.5l-7 5" fill="none" stroke="#8d2f2f" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+        <h1>
+          <svg class="plug" viewBox="4 11 56 36" aria-hidden="true" focusable="false">
             <g fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
               <path d="M31.5 15.2c3.9-.4 9.6-.5 13.1.1.9 3.9 1 13.9.2 18.3-3.6.7-9.4.6-13.4.1-.7-5-.6-13.6.1-18.5z"/>
               <path d="M44.9 20.6c4-.2 8.6 0 12.3.3M45 28.6c4.1-.1 8.7 0 12.4.4"/>
@@ -45,8 +45,12 @@
               <path d="M24.9 24.8C19 25.2 14.3 27.9 12 32.2c-2.6 4.9.4 9.6 5.3 9.2 4.4-.4 4.6-5.6 1-6.4-4.1-.9-8.6 3.4-11.2 9.6"/>
             </g>
           </svg>
-          <h1>excuse-generator</h1>
-        </div>
+          excuse-generator
+        </h1>
+        <p class="tagline">
+          <span class="tagline-line">Generates excuses to skip meetings.</span>
+          <span class="tagline-line">Results not guaranteed.</span>
+        </p>
         <div class="lang-switch" id="lang-switch" role="radiogroup" aria-label="Language">
           <button type="button" class="lang is-on" data-lang="en" aria-checked="true">EN</button>
           <button type="button" class="lang" data-lang="ja" aria-checked="false">日本語</button>
@@ -54,12 +58,7 @@
         </div>
       </header>
 
-      <p class="tagline">
-        <span class="tagline-line">Generates excuses to skip meetings.</span>
-        <span class="tagline-line">Results not guaranteed.</span>
-      </p>
-
-      <form id="excuse-form" class="controls">
+      <form id="excuse-form" class="panel">
         <label class="field" for="meeting">
           <span class="field-label" data-i18n="meeting">Meeting</span>
           <span class="select-wrap">
@@ -118,10 +117,8 @@
           <span data-i18n="asDecline">Write it as a decline</span>
         </label>
 
-        <div class="go-row">
-          <button type="submit" class="primary" id="generate">Generate an excuse</button>
-          <p class="hint" data-i18n="hint">Nothing is sent. The excuse stays in this browser.</p>
-        </div>
+        <button type="submit" class="primary" id="generate">Generate an excuse</button>
+        <p class="hint" data-i18n="hint">Nothing is sent. The excuse stays in this browser.</p>
       </form>
 
       <article class="invite" id="invite" data-state="empty" aria-live="polite">
@@ -145,7 +142,7 @@
       </noscript>
 
       <footer class="site-footer">
-        <a href="https://github.com/uselesssoso">@uselesssoso</a>
+        <p><span data-i18n="signed">Signed</span> <a href="https://github.com/uselesssoso">@uselesssoso</a></p>
       </footer>
     </main>
     <script src="excuses.js"></script>

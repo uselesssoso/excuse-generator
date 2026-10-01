@@ -2,7 +2,7 @@
 
 Generates excuses to skip meetings. Results not guaranteed.
 
-![A declined meeting excuse on blue graph paper](docs/screenshot.png)
+![A declined meeting card with a deadpan excuse](docs/screenshot.png)
 
 A small page that writes an excuse for skipping a meeting. Pick the meeting, how believable it should be, and who it is for. Read it in English, Japanese, or Chinese. Copy it, or post a short version on X.
 
